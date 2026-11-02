@@ -18,3 +18,4 @@
     <footer class="footer">© 2026 NutriRec AI Kiosk. All rights reserved.</footer>
 </body>
 </html>
+~
