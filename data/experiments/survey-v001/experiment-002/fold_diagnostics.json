@@ -1,0 +1,147 @@
+[
+  {
+    "fold": 1,
+    "train": {
+      "baris": 842,
+      "uid": 45,
+      "kelompok": 44,
+      "kelas": {
+        "1": 7,
+        "2": 131,
+        "3": 394,
+        "4": 310
+      },
+      "kelas_tidak_tersedia": []
+    },
+    "test": {
+      "baris": 208,
+      "uid": 11,
+      "kelompok": 10,
+      "kelas": {
+        "1": 0,
+        "2": 50,
+        "3": 124,
+        "4": 34
+      },
+      "kelas_tidak_tersedia": [
+        1
+      ]
+    }
+  },
+  {
+    "fold": 2,
+    "train": {
+      "baris": 842,
+      "uid": 45,
+      "kelompok": 44,
+      "kelas": {
+        "1": 7,
+        "2": 140,
+        "3": 397,
+        "4": 298
+      },
+      "kelas_tidak_tersedia": []
+    },
+    "test": {
+      "baris": 208,
+      "uid": 11,
+      "kelompok": 10,
+      "kelas": {
+        "1": 0,
+        "2": 41,
+        "3": 121,
+        "4": 46
+      },
+      "kelas_tidak_tersedia": [
+        1
+      ]
+    }
+  },
+  {
+    "fold": 3,
+    "train": {
+      "baris": 830,
+      "uid": 44,
+      "kelompok": 42,
+      "kelas": {
+        "1": 7,
+        "2": 153,
+        "3": 417,
+        "4": 253
+      },
+      "kelas_tidak_tersedia": []
+    },
+    "test": {
+      "baris": 220,
+      "uid": 12,
+      "kelompok": 12,
+      "kelas": {
+        "1": 0,
+        "2": 28,
+        "3": 101,
+        "4": 91
+      },
+      "kelas_tidak_tersedia": [
+        1
+      ]
+    }
+  },
+  {
+    "fold": 4,
+    "train": {
+      "baris": 843,
+      "uid": 45,
+      "kelompok": 43,
+      "kelas": {
+        "1": 7,
+        "2": 158,
+        "3": 425,
+        "4": 253
+      },
+      "kelas_tidak_tersedia": []
+    },
+    "test": {
+      "baris": 207,
+      "uid": 11,
+      "kelompok": 11,
+      "kelas": {
+        "1": 0,
+        "2": 23,
+        "3": 93,
+        "4": 91
+      },
+      "kelas_tidak_tersedia": [
+        1
+      ]
+    }
+  },
+  {
+    "fold": 5,
+    "train": {
+      "baris": 843,
+      "uid": 45,
+      "kelompok": 43,
+      "kelas": {
+        "1": 0,
+        "2": 142,
+        "3": 439,
+        "4": 262
+      },
+      "kelas_tidak_tersedia": [
+        1
+      ]
+    },
+    "test": {
+      "baris": 207,
+      "uid": 11,
+      "kelompok": 11,
+      "kelas": {
+        "1": 7,
+        "2": 39,
+        "3": 79,
+        "4": 82
+      },
+      "kelas_tidak_tersedia": []
+    }
+  }
+]

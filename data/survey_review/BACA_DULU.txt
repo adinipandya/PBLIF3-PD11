@@ -1,0 +1,15 @@
+HASIL PEMERIKSAAN SURVEI NUTRIREC AI
+
+Sumber asli tidak diubah. CSV UTF-8 BOM dapat dibuka di Excel.
+respons_ditandai.csv: satu baris per kiriman.
+semua_penilaian_ditandai.csv: seluruh rating beserta label asli dan alasan.
+penilaian_lolos_pemeriksaan_dasar.csv: lolos aturan struktural/konsistensi dasar, BUKAN siap ML.
+penilaian_perlu_tinjau.csv: ditahan karena konflik profil atau rating 1 tanpa alergi.
+Tidak ada penggantian rating atau dugaan koreksi alergi.
+Jawaban identik dan rating seragam hanya ditandai; belum dibuang.
+ID makanan kosong karena dataset revisi terkini tidak tersedia dalam pekerjaan ini; tidak menebak ID dari urutan.
+Seimbang tidak ada prioritas khusus berbeda dari formula komposisi backend. Capcay Kuah perlu dicocokkan dengan versi dataset.
+Jangan gunakan response_id atau source_row sebagai fitur model. ID hanya untuk pelacakan dan pembagian kelompok.
+Timestamp tidak disertakan dalam hasil, sumber tetap tersimpan.
+Tidak ada kesalahan rating struktural; karena itu tidak ada CSV penilaian_tidak_valid.
+Jumlah kiriman bukan jumlah orang yang terverifikasi.

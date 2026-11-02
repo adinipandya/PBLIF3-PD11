@@ -1,0 +1,66 @@
+{
+  "eksperimen_awal": true,
+  "siap_produksi": false,
+  "versi_aturan": "groupcv-awal-v1",
+  "dataset_version": "survey-v001",
+  "run_id": "run-001",
+  "feature_version": "fitur-mentah-v1",
+  "seed": 42,
+  "python": "3.11.18",
+  "scikit_learn": "1.5.2",
+  "numpy": "2.4.6",
+  "scipy": "1.17.1",
+  "config": {
+    "seed": 42,
+    "splitter": "GroupKFold(n_splits=5), urutan baris stabil; seed tidak memengaruhi splitter",
+    "fitur": [
+      "target_kalori",
+      "prioritas",
+      "status_alergi",
+      "alergen_1",
+      "alergen_2",
+      "alergen_3",
+      "alergen_4",
+      "alergen_5",
+      "alergen_6",
+      "alergen_7",
+      "alergen_8",
+      "alergen_9",
+      "alergen_10",
+      "alergen_11",
+      "kalori_kkal",
+      "protein_g",
+      "karbohidrat_g",
+      "lemak_g"
+    ],
+    "label": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "model": {
+      "Dummy": "most_frequent",
+      "Decision Tree": "max_depth=5,min_samples_leaf=5,class_weight=None",
+      "Random Forest": "n_estimators=200,max_depth=8,min_samples_leaf=5,n_jobs=2,class_weight=None",
+      "KNN": "n_neighbors=5,weights=uniform,metric=minkowski,p=2"
+    }
+  },
+  "masukan_sha256": {
+    "evaluation_feasibility_report.json": "41733466f69b0243128ecbd788e10a13035172c16caa958f1fcdf17ea7680e5c",
+    "evaluation_groups.csv": "d7a1d641ec54ab454a6ff2390dec844179ab5f7d3081a6732696a68b8b7e6ee4",
+    "experiment_plan.md": "6b2ce3892fd4479a29600127949bfebc6d1982ac96601a0958ef86b84d7fb36d",
+    "feature_schema.json": "16947778c03fdcfe1c862dca16b8bd14d73bf0fe356f30b0eb8d646b1e34e122",
+    "manifest.json": "33a53b1939457593a204d8e0604d525484c294c8971ef37cf710260841181f1a",
+    "ml_feature_table.csv": "f123da7b9c5fa61c0fedfeb5e0838339e344883c5d66d28074e2609225b7cda7"
+  },
+  "output_sha256": {
+    "experiment_config.json": "d61e4a4186fda9e7db84701cd7d898b97448ea0b0ab7c9d031ec41291bb32970",
+    "metrics_by_fold.csv": "7d921b808bf231870a2fbd82dab94acf98f9aeb6468ba4e9fd4192d2de1c9480",
+    "experiment_report.md": "062b89415c25139760fc54be31558679877d6ddc0f158614657a78245a328481",
+    "fold_assignments.csv": "ea7673f8a1e94f631a59cedf59edb390028831df453f3b7b807501b3e7dee94d",
+    "fold_diagnostics.json": "ad80ad74cb86c922e090ab83dbfc2d50a1e2ea05fa494c84f94c7e04bef48a66",
+    "out_of_fold_predictions.csv": "80738d160d043c177e60bb1b525f34184d8edcb2631aadc4b55414b6d8cb831b",
+    "metrics_summary.json": "ffdb7a132d83eeee1b343804f982759af792f0f5237c5332c6666e950f8b5c66"
+  }
+}

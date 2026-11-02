@@ -1,0 +1,66 @@
+﻿response_id,source_row,timestamp,target_kalori_asli,target_kalori_id,prioritas_asli,prioritas_id,status_alergi_asli,alergen_asli,alergen_ids,penanda,tahan_seluruh_kiriman
+R001,2,2026-10-27 07:59:26.131000,Rendah (< 300 kkal),1,Protein tinggi,1,Tidak ada alergi,,,,False
+R002,3,2026-10-27 08:00:34.598000,Tinggi (> 500 kkal),3,Protein tinggi,1,Tidak ada alergi,,,,False
+R003,4,2026-10-27 08:00:55.490000,Tinggi (> 500 kkal),3,Protein tinggi,1,"Ya, memiliki alergi",Udang/seafood,9,,False
+R004,5,2026-10-27 08:02:27.379000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R005,6,2026-10-27 08:05:43.606000,Sedang (300-500 kkal),2,Karbohidrat tinggi,2,"Ya, memiliki alergi",Ayam,5,,False
+R006,7,2026-10-27 08:10:23.897000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R007,8,2026-10-27 08:32:16.108000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,Kedelai,2,konflik_tanpa_alergi_dengan_pilihan;makna_seimbang_perlu_diselaraskan,True
+R008,9,2026-10-27 08:35:31.152000,Tinggi (> 500 kkal),3,Protein tinggi,1,Tidak ada alergi,,,rating_seragam,False
+R009,10,2026-10-27 08:48:26.827000,Rendah (< 300 kkal),1,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi",Udang/seafood,9,makna_seimbang_perlu_diselaraskan,False
+R010,11,2026-10-27 08:49:06.571000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R011,12,2026-10-27 08:59:52.591000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,Gandum,7,konflik_tanpa_alergi_dengan_pilihan;makna_seimbang_perlu_diselaraskan,True
+R012,13,2026-10-27 09:02:16.543000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi",Udang/seafood,9,makna_seimbang_perlu_diselaraskan,False
+R013,14,2026-10-27 09:08:21.006000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi","Gandum, Udang/seafood",7;9,makna_seimbang_perlu_diselaraskan,False
+R014,15,2026-10-27 09:08:58.632000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan;kemungkinan_duplikat;rating_seragam,False
+R015,16,2026-10-27 09:09:43.441000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R016,17,2026-10-27 09:26:46.425000,Tinggi (> 500 kkal),3,Protein tinggi,1,Tidak ada alergi,,,kemungkinan_duplikat,False
+R017,18,2026-10-27 09:26:50.234000,Tinggi (> 500 kkal),3,Protein tinggi,1,Tidak ada alergi,,,kemungkinan_duplikat,False
+R018,19,2026-10-27 09:32:04.600000,Tinggi (> 500 kkal),3,Karbohidrat tinggi,2,Tidak ada alergi,,,,False
+R019,20,2026-10-27 09:33:10.772000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R020,21,2026-10-27 09:55:56.608000,Rendah (< 300 kkal),1,Karbohidrat tinggi,2,"Ya, memiliki alergi",Udang/seafood,9,rating_seragam,False
+R021,22,2026-10-27 10:15:17.767000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi",Udang/seafood,9,makna_seimbang_perlu_diselaraskan,False
+R022,23,2026-10-27 10:15:22.104000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi",Udang/seafood,9,makna_seimbang_perlu_diselaraskan,False
+R023,24,2026-10-27 10:21:00.324000,Sedang (300-500 kkal),2,Karbohidrat tinggi,2,Tidak ada alergi,,,,False
+R024,25,2026-10-27 10:23:37.274000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan;rating_seragam,False
+R025,26,2026-10-27 11:02:23.463000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R026,27,2026-10-27 11:14:16.352000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R027,28,2026-10-27 12:21:36.486000,Sedang (300-500 kkal),2,Protein tinggi,1,"Ya, memiliki alergi",Udang/seafood,9,,False
+R028,29,2026-10-27 14:24:52.035000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,"Kacang-kacangan (tauge, kacang tanah, buncis)",8,konflik_tanpa_alergi_dengan_pilihan;makna_seimbang_perlu_diselaraskan,True
+R029,30,2026-10-27 14:53:08.509000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R030,31,2026-10-27 15:04:26.427000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,Udang/seafood,9,konflik_tanpa_alergi_dengan_pilihan;makna_seimbang_perlu_diselaraskan,True
+R031,32,2026-10-27 15:27:15.484000,Tinggi (> 500 kkal),3,Protein tinggi,1,Tidak ada alergi,,,,False
+R032,33,2026-10-27 16:35:40.459000,Sedang (300-500 kkal),2,Protein tinggi,1,"Ya, memiliki alergi","Telur, Udang/seafood",1;9,,False
+R033,34,2026-10-27 18:45:07.283000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan;kemungkinan_duplikat;rating_seragam,False
+R034,35,2026-10-27 18:46:30.768000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R035,36,2026-10-27 20:43:46.003000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R036,37,2026-10-27 20:44:35.636000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R037,38,2026-10-27 20:44:38.877000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R038,39,2026-10-27 20:44:55.633000,Sedang (300-500 kkal),2,Karbohidrat tinggi,2,Tidak ada alergi,Telur,1,konflik_tanpa_alergi_dengan_pilihan,True
+R039,40,2026-10-27 20:45:30.368000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R040,41,2026-10-27 20:46:03.695000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,"Telur, Udang/seafood",1;9,konflik_tanpa_alergi_dengan_pilihan,True
+R041,42,2026-10-27 20:46:59.317000,Tinggi (> 500 kkal),3,Protein tinggi,1,Tidak ada alergi,,,,False
+R042,43,2026-10-27 20:48:41.581000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R043,44,2026-10-27 20:49:39.381000,Rendah (< 300 kkal),1,Protein tinggi,1,Tidak ada alergi,"Telur, Ayam, Daging sapi, Ikan",1;5;6;10,konflik_tanpa_alergi_dengan_pilihan,True
+R044,45,2026-10-27 20:50:40.010000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R045,46,2026-10-27 20:52:58.070000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R046,47,2026-10-27 20:57:40.992000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R047,48,2026-10-27 20:58:15.354000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R048,49,2026-10-27 21:05:17.777000,Rendah (< 300 kkal),1,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R049,50,2026-10-27 21:08:20.954000,Tinggi (> 500 kkal),3,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R050,51,2026-10-27 21:54:18.785000,Tinggi (> 500 kkal),3,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R051,52,2026-10-27 22:00:24.362000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R052,53,2026-10-27 22:25:09.858000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R053,54,2026-10-27 22:44:16.252000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,Gandum,7,konflik_tanpa_alergi_dengan_pilihan;makna_seimbang_perlu_diselaraskan,True
+R054,55,2026-10-28 00:18:28.222000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R055,56,2026-10-28 00:49:39.176000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R056,57,2026-10-28 11:46:30.930000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi",Ikan,10,makna_seimbang_perlu_diselaraskan,False
+R057,58,2026-10-28 13:38:55.146000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R058,59,2026-10-28 17:06:40.035000,Tinggi (> 500 kkal),3,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,,,makna_seimbang_perlu_diselaraskan,False
+R059,60,2026-10-28 18:06:18.129000,Sedang (300-500 kkal),2,Protein tinggi,1,Tidak ada alergi,,,,False
+R060,61,2026-10-28 19:10:24.074000,Rendah (< 300 kkal),1,Protein tinggi,1,"Ya, memiliki alergi","Telur, Udang/seafood",1;9,,False
+R061,62,2026-10-30 10:29:42.522000,Sedang (300-500 kkal),2,Lemak tinggi,3,Tidak ada alergi,,,,False
+R062,63,2026-10-30 13:01:52.191000,Sedang (300-500 kkal),2,Protein tinggi,1,"Ya, memiliki alergi","Telur, Kacang-kacangan (tauge, kacang tanah, buncis)",1;8,,False
+R063,64,2026-10-30 17:41:22.990000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi",Udang/seafood,9,makna_seimbang_perlu_diselaraskan,False
+R064,65,2026-10-30 17:44:35.644000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,"Ya, memiliki alergi",Udang/seafood,9,makna_seimbang_perlu_diselaraskan,False
+R065,66,2026-10-30 18:02:51.260000,Sedang (300-500 kkal),2,Seimbang (tidak ada prioritas khusus),4,Tidak ada alergi,Udang/seafood,9,konflik_tanpa_alergi_dengan_pilihan;makna_seimbang_perlu_diselaraskan,True

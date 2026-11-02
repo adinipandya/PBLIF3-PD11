@@ -1,0 +1,28 @@
+{
+  "dataset_version": "survey-v001",
+  "source_sha256": "165793a78ce360ed10a374714bba59c639f4d0ef23ee305c7011f88ff660f98c",
+  "form_version": "legacy-v1",
+  "source_namespace": "nutrirec-survey",
+  "mode": "snapshot",
+  "previous_version": null,
+  "identity_rules": "identitas-v1",
+  "decisions_sha256": null,
+  "jumlah": {
+    "baru": 65,
+    "cocok": 0,
+    "kemungkinan_berubah": 0,
+    "ambigu": 0,
+    "tidak_muncul": 0,
+    "cocok_manual": 0,
+    "baru_manual": 0
+  },
+  "status": "selesai",
+  "output_sha256": {
+    "ingestion_report.json": "24a8be5d48cbfa23a27e6196dfa21e0740d7a971a965ae57717785ad480f0b23",
+    "submission_identity_map.csv": "cc6635996cea8b5531dc6c22ccbcd2a9bddbcbe8a27464cf5385348052cd58be",
+    "source.xlsx": "165793a78ce360ed10a374714bba59c639f4d0ef23ee305c7011f88ff660f98c"
+  },
+  "aturan_persiapan": "tidak dijalankan",
+  "aturan_seleksi": "tidak dijalankan",
+  "catatan": "UID mengidentifikasi kiriman, bukan orang; timestamp bukan fitur ML."
+}

@@ -1,0 +1,17 @@
+{
+  "status": "analisis_eksploratif",
+  "siap_produksi": false,
+  "dataset_version": "survey-v001",
+  "run_id": "run-001",
+  "masukan_sha256": {
+    "experiment_manifest": "ed1483016430394101b48d27ed905ff0879224828b24eff10afaa18928b68977",
+    "features_manifest": "33a53b1939457593a204d8e0604d525484c294c8971ef37cf710260841181f1a",
+    "prediksi_oof": "80738d160d043c177e60bb1b525f34184d8edcb2631aadc4b55414b6d8cb831b",
+    "fitur": "f123da7b9c5fa61c0fedfeb5e0838339e344883c5d66d28074e2609225b7cda7"
+  },
+  "output_sha256": {
+    "error_analysis_report.json": "34938750fca0508204b45fcea83127d2eef5202c11ec0887525cd9d8c8847edf",
+    "oof_errors.csv": "1edad7225e18ab799c5eb43b203eb165a4b9dee904a49b3d44e5661adeb64700",
+    "error_analysis_report.md": "0b7debe9e157143fe2df688bc680d470a447d310cf678dc96f766692f67963f7"
+  }
+}

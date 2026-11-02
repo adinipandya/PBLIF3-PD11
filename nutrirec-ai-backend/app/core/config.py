@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # ── CORS ──────────────────────────────────────────────────────────────
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:5500"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:5500,http://127.0.0.1:8001,http://localhost:8001"
 
     # ── Versi dataset yang aktif ──────────────────────────────────────────
     DATASET_VERSION: str = "revisi-PD11-R1"
@@ -45,4 +45,3 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Kembalikan instance Settings yang di-cache (singleton)."""
     return Settings()
-

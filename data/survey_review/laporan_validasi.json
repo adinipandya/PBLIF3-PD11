@@ -1,0 +1,44 @@
+{
+  "source_sha256": "165793a78ce360ed10a374714bba59c639f4d0ef23ee305c7011f88ff660f98c",
+  "jumlah_kiriman": 65,
+  "jumlah_penilaian": 1300,
+  "status_penilaian": {
+    "lolos_pemeriksaan_dasar": 1105,
+    "perlu_tinjau": 195
+  },
+  "rating": {
+    "3": 644,
+    "2": 226,
+    "1": 32,
+    "4": 398
+  },
+  "jumlah_kiriman_per_penanda": {
+    "konflik_tanpa_alergi_dengan_pilihan": 9,
+    "makna_seimbang_perlu_diselaraskan": 35,
+    "rating_seragam": 5,
+    "kemungkinan_duplikat": 4
+  },
+  "kiriman_rating_1_tanpa_alergi": [
+    "R001",
+    "R002",
+    "R007",
+    "R015",
+    "R035",
+    "R049",
+    "R054",
+    "R058",
+    "R059"
+  ],
+  "kelompok_jawaban_identik": [
+    [
+      "R014",
+      "R033"
+    ],
+    [
+      "R016",
+      "R017"
+    ]
+  ],
+  "siap_ml": false,
+  "catatan": "Lolos dasar bukan siap ML. Pemetaan ID makanan belum dilakukan. Makna Seimbang dan Capcay belum diselaraskan. Duplikasi/rating seragam hanya ditandai, tidak dihapus. Konflik profil ditahan seluruh kiriman; rating 1 tanpa alergi ditahan pada penilaian terkait."
+}

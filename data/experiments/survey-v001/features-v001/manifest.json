@@ -1,0 +1,22 @@
+{
+  "status": "fitur_eksperimen",
+  "siap_training": false,
+  "versi_aturan_fitur": "fitur-mentah-v1",
+  "dataset_version": "survey-v001",
+  "run_id": "run-001",
+  "jumlah_baris": 1050,
+  "masukan_sha256": {
+    "processing_manifest": "950b7a106bc1e71a92cec9dd7847f7fa2a6f1427f45406d4c1b78c20d4785930",
+    "candidate": "95ca14bd5a15a7556a9ac592db767d992de77802216fc0e9f44952bfa89b4134",
+    "candidate_report": "500152d8e5d9a1ba6eadea5f74974613d6230c12cf543e5eb7e6ce17fdc63ce6",
+    "responses": "1b83e513b147be95024ae5c86c506c69e845e12e6eaebeff8c4c1d8547077c1d",
+    "foods": "983ac7798ef6d5e4f307191c1f881f2940a0f76c12c601b3909afd100fd1dd79"
+  },
+  "output_sha256": {
+    "evaluation_feasibility_report.json": "41733466f69b0243128ecbd788e10a13035172c16caa958f1fcdf17ea7680e5c",
+    "ml_feature_table.csv": "f123da7b9c5fa61c0fedfeb5e0838339e344883c5d66d28074e2609225b7cda7",
+    "experiment_plan.md": "6b2ce3892fd4479a29600127949bfebc6d1982ac96601a0958ef86b84d7fb36d",
+    "evaluation_groups.csv": "d7a1d641ec54ab454a6ff2390dec844179ab5f7d3081a6732696a68b8b7e6ee4",
+    "feature_schema.json": "16947778c03fdcfe1c862dca16b8bd14d73bf0fe356f30b0eb8d646b1e34e122"
+  }
+}

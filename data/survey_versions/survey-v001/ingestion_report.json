@@ -1,0 +1,23 @@
+{
+  "counts": {
+    "baru": 65,
+    "cocok": 0,
+    "kemungkinan_berubah": 0,
+    "ambigu": 0,
+    "tidak_muncul": 0,
+    "cocok_manual": 0,
+    "baru_manual": 0
+  },
+  "review": [],
+  "previous_version": null,
+  "kemungkinan_duplikat_jawaban": [
+    [
+      "R014",
+      "R033"
+    ],
+    [
+      "R016",
+      "R017"
+    ]
+  ]
+}

@@ -94,11 +94,7 @@
 
     </main>
 
-    <footer class="footer">
-        © 2026 NutriRec AI Kiosk. All rights reserved.
-        <br>
-        Informasi nutrisi disediakan untuk tujuan edukasi.
-    </footer>
+    <footer class="footer">© 2026 NutriRec AI Kiosk. All rights reserved.</footer>
 
 </body>
 </html>

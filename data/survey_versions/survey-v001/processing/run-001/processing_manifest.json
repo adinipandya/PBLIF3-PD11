@@ -1,0 +1,27 @@
+{
+  "status": "selesai",
+  "run_id": "run-001",
+  "dataset_version": "survey-v001",
+  "form_version": "legacy-v1",
+  "source_namespace": "nutrirec-survey",
+  "manifest_versi_sha256": "5bdac1a6b2a62675e48930242fc95d320f3f28d8bc9422afc108cb0ef1685425",
+  "source_sha256": "165793a78ce360ed10a374714bba59c639f4d0ef23ee305c7011f88ff660f98c",
+  "sidecar_sha256": "cc6635996cea8b5531dc6c22ccbcd2a9bddbcbe8a27464cf5385348052cd58be",
+  "foods_sha256": "983ac7798ef6d5e4f307191c1f881f2940a0f76c12c601b3909afd100fd1dd79",
+  "aturan_identitas": "identitas-v1",
+  "aturan_pemetaan_persiapan": "survei-PD11-1",
+  "aturan_seleksi": "kandidat-survei-1",
+  "jumlah_kiriman": 65,
+  "jumlah_penilaian": 1300,
+  "jumlah_kandidat": 1050,
+  "jumlah_pengecualian": 250,
+  "output_sha256": {
+    "candidate/survey_candidate_report.json": "500152d8e5d9a1ba6eadea5f74974613d6230c12cf543e5eb7e6ce17fdc63ce6",
+    "candidate/survey_excluded.csv": "11cb426c77d9acf2d07cddc4fd9b44da129b40ff7d129a18b26c7864dbfaac1b",
+    "candidate/survey_candidate.csv": "95ca14bd5a15a7556a9ac592db767d992de77802216fc0e9f44952bfa89b4134",
+    "processed/survey_validation_report.json": "19764f00174a4631adc9497457190c5e0a21ffcc398a7fde7b58a47f74b7513c",
+    "processed/survey_ratings_long.csv": "178a4d91bbfb0b45e2abc4562d53fbe7fc4890c3196c8e7cd8d55a85ecde9857",
+    "processed/survey_responses.csv": "1b83e513b147be95024ae5c86c506c69e845e12e6eaebeff8c4c1d8547077c1d"
+  },
+  "siap_training": false
+}

@@ -7,6 +7,16 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Menjalankan NutriRec secara lokal
+
+Antarmuka Laravel menggunakan endpoint FastAPI content-based, bukan model ML. Data pilihan dan hasil hanya disimpan sementara pada sessionStorage browser. Siapkan MySQL dengan skema dan data NutriRec yang telah ada; `/ready` hanya memeriksa koneksi dan tidak membuktikan tabel atau data referensi tersedia. Jangan jalankan migrasi atau impor pada database yang belum diperiksa.
+
+Di direktori `nutrirec-ai-backend`, aktifkan MySQL yang dipakai proyek, lalu jalankan `.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`. Pastikan `ALLOWED_ORIGINS` pada konfigurasi backend mencakup `http://127.0.0.1:8001`; nilai `.env` yang sudah ada menggantikan default. Jangan menampilkan kredensial.
+
+Di direktori `laravel`, jalankan `composer install`, `npm ci`, salin `.env.example` ke `.env` jika belum ada, dan jalankan `php artisan key:generate` hanya untuk instalasi baru yang belum memiliki APP_KEY. Atur `SESSION_DRIVER=file` agar website tidak memerlukan tabel sesi Laravel. `VITE_NUTRIREC_API_URL` di `.env` menentukan alamat API; nilai contoh adalah `http://127.0.0.1:8000`. Setelah mengubah nilai Vite jalankan `npm run build`, lalu `php artisan serve --host=127.0.0.1 --port=8001`. Buka `http://127.0.0.1:8001/`.
+
+Uji helper frontend dengan `node --test tests/integration.test.js`. Jika referensi tidak dapat dimuat, pastikan endpoint `/api/v1/reference-data` mengembalikan 200, bukan hanya `/ready`, dan periksa CORS. Hasil kosong merupakan respons yang sah. Filter alergi bukan jaminan keamanan.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

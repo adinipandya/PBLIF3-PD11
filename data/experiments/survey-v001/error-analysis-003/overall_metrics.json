@@ -1,0 +1,514 @@
+{
+  "Decision Tree": {
+    "penilaian": 1050,
+    "uid": 56,
+    "kelompok": 54,
+    "fold": 5,
+    "accuracy": 0.44571428571428573,
+    "mae": 0.6257142857142857,
+    "macro_f1": 0.19775990755881648,
+    "kelas": {
+      "1": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7,
+        "dapat_dievaluasi": true
+      },
+      "2": {
+        "precision": 0.05263157894736842,
+        "recall": 0.011049723756906077,
+        "f1": 0.0182648401826484,
+        "support": 181,
+        "dapat_dievaluasi": true
+      },
+      "3": {
+        "precision": 0.5023419203747073,
+        "recall": 0.8281853281853282,
+        "f1": 0.6253644314868805,
+        "support": 518,
+        "dapat_dievaluasi": true
+      },
+      "4": {
+        "precision": 0.23417721518987342,
+        "recall": 0.10755813953488372,
+        "f1": 0.14741035856573706,
+        "support": 344,
+        "dapat_dievaluasi": true
+      }
+    },
+    "uid_accuracy": 0.4439223057644109,
+    "uid_mae": 0.6278404344193819,
+    "matrix": [
+      [
+        0,
+        0,
+        4,
+        3
+      ],
+      [
+        0,
+        2,
+        139,
+        40
+      ],
+      [
+        0,
+        11,
+        429,
+        78
+      ],
+      [
+        0,
+        25,
+        282,
+        37
+      ]
+    ],
+    "normalisasi": [
+      [
+        0.0,
+        0.0,
+        0.5714285714285714,
+        0.42857142857142855
+      ],
+      [
+        0.0,
+        0.011049723756906077,
+        0.7679558011049724,
+        0.22099447513812154
+      ],
+      [
+        0.0,
+        0.021235521235521235,
+        0.8281853281853282,
+        0.15057915057915058
+      ],
+      [
+        0.0,
+        0.07267441860465117,
+        0.8197674418604651,
+        0.10755813953488372
+      ]
+    ],
+    "aktual": {
+      "1": 7,
+      "2": 181,
+      "3": 518,
+      "4": 344
+    },
+    "prediksi": {
+      "1": 0,
+      "2": 38,
+      "3": 854,
+      "4": 158
+    },
+    "benar": 468,
+    "salah_satu": 510,
+    "salah_dua_atau_lebih": 72,
+    "terlalu_tinggi": 264,
+    "terlalu_rendah": 318,
+    "kelas_tidak_tersedia": [],
+    "dukungan_sangat_terbatas": false,
+    "rating_1": {
+      "penilaian": 7,
+      "uid": 2,
+      "kelompok": 2,
+      "fold": [
+        "5"
+      ],
+      "train_tersedia": {
+        "penilaian": 0,
+        "benar": 0
+      },
+      "train_tidak_tersedia": {
+        "penilaian": 7,
+        "benar": 0
+      }
+    }
+  },
+  "Dummy": {
+    "penilaian": 1050,
+    "uid": 56,
+    "kelompok": 54,
+    "fold": 5,
+    "accuracy": 0.49333333333333335,
+    "mae": 0.5133333333333333,
+    "macro_f1": 0.16517857142857142,
+    "kelas": {
+      "1": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7,
+        "dapat_dievaluasi": true
+      },
+      "2": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 181,
+        "dapat_dievaluasi": true
+      },
+      "3": {
+        "precision": 0.49333333333333335,
+        "recall": 1.0,
+        "f1": 0.6607142857142857,
+        "support": 518,
+        "dapat_dievaluasi": true
+      },
+      "4": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 344,
+        "dapat_dievaluasi": true
+      }
+    },
+    "uid_accuracy": 0.49213659147869665,
+    "uid_mae": 0.5144423558897243,
+    "matrix": [
+      [
+        0,
+        0,
+        7,
+        0
+      ],
+      [
+        0,
+        0,
+        181,
+        0
+      ],
+      [
+        0,
+        0,
+        518,
+        0
+      ],
+      [
+        0,
+        0,
+        344,
+        0
+      ]
+    ],
+    "normalisasi": [
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    ],
+    "aktual": {
+      "1": 7,
+      "2": 181,
+      "3": 518,
+      "4": 344
+    },
+    "prediksi": {
+      "1": 0,
+      "2": 0,
+      "3": 1050,
+      "4": 0
+    },
+    "benar": 518,
+    "salah_satu": 525,
+    "salah_dua_atau_lebih": 7,
+    "terlalu_tinggi": 188,
+    "terlalu_rendah": 344,
+    "kelas_tidak_tersedia": [],
+    "dukungan_sangat_terbatas": false,
+    "rating_1": {
+      "penilaian": 7,
+      "uid": 2,
+      "kelompok": 2,
+      "fold": [
+        "5"
+      ],
+      "train_tersedia": {
+        "penilaian": 0,
+        "benar": 0
+      },
+      "train_tidak_tersedia": {
+        "penilaian": 7,
+        "benar": 0
+      }
+    }
+  },
+  "KNN": {
+    "penilaian": 1050,
+    "uid": 56,
+    "kelompok": 54,
+    "fold": 5,
+    "accuracy": 0.3942857142857143,
+    "mae": 0.72,
+    "macro_f1": 0.24519257068345895,
+    "kelas": {
+      "1": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7,
+        "dapat_dievaluasi": true
+      },
+      "2": {
+        "precision": 0.15384615384615385,
+        "recall": 0.16574585635359115,
+        "f1": 0.1595744680851064,
+        "support": 181,
+        "dapat_dievaluasi": true
+      },
+      "3": {
+        "precision": 0.4991624790619765,
+        "recall": 0.5752895752895753,
+        "f1": 0.5345291479820627,
+        "support": 518,
+        "dapat_dievaluasi": true
+      },
+      "4": {
+        "precision": 0.3359375,
+        "recall": 0.25,
+        "f1": 0.2866666666666667,
+        "support": 344,
+        "dapat_dievaluasi": true
+      }
+    },
+    "uid_accuracy": 0.39425647451963247,
+    "uid_mae": 0.7203007518796991,
+    "matrix": [
+      [
+        0,
+        2,
+        3,
+        2
+      ],
+      [
+        1,
+        30,
+        110,
+        40
+      ],
+      [
+        0,
+        92,
+        298,
+        128
+      ],
+      [
+        1,
+        71,
+        186,
+        86
+      ]
+    ],
+    "normalisasi": [
+      [
+        0.0,
+        0.2857142857142857,
+        0.42857142857142855,
+        0.2857142857142857
+      ],
+      [
+        0.0055248618784530384,
+        0.16574585635359115,
+        0.6077348066298343,
+        0.22099447513812154
+      ],
+      [
+        0.0,
+        0.1776061776061776,
+        0.5752895752895753,
+        0.2471042471042471
+      ],
+      [
+        0.0029069767441860465,
+        0.2063953488372093,
+        0.5406976744186046,
+        0.25
+      ]
+    ],
+    "aktual": {
+      "1": 7,
+      "2": 181,
+      "3": 518,
+      "4": 344
+    },
+    "prediksi": {
+      "1": 2,
+      "2": 195,
+      "3": 597,
+      "4": 256
+    },
+    "benar": 414,
+    "salah_satu": 519,
+    "salah_dua_atau_lebih": 117,
+    "terlalu_tinggi": 285,
+    "terlalu_rendah": 351,
+    "kelas_tidak_tersedia": [],
+    "dukungan_sangat_terbatas": false,
+    "rating_1": {
+      "penilaian": 7,
+      "uid": 2,
+      "kelompok": 2,
+      "fold": [
+        "5"
+      ],
+      "train_tersedia": {
+        "penilaian": 0,
+        "benar": 0
+      },
+      "train_tidak_tersedia": {
+        "penilaian": 7,
+        "benar": 0
+      }
+    }
+  },
+  "Random Forest": {
+    "penilaian": 1050,
+    "uid": 56,
+    "kelompok": 54,
+    "fold": 5,
+    "accuracy": 0.40095238095238095,
+    "mae": 0.6580952380952381,
+    "macro_f1": 0.16822622290202877,
+    "kelas": {
+      "1": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7,
+        "dapat_dievaluasi": true
+      },
+      "2": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 181,
+        "dapat_dievaluasi": true
+      },
+      "3": {
+        "precision": 0.4669811320754717,
+        "recall": 0.7644787644787645,
+        "f1": 0.5797950219619326,
+        "support": 518,
+        "dapat_dievaluasi": true
+      },
+      "4": {
+        "precision": 0.12953367875647667,
+        "recall": 0.07267441860465117,
+        "f1": 0.09310986964618251,
+        "support": 344,
+        "dapat_dievaluasi": true
+      }
+    },
+    "uid_accuracy": 0.39959273182957394,
+    "uid_mae": 0.6596073517126146,
+    "matrix": [
+      [
+        0,
+        0,
+        4,
+        3
+      ],
+      [
+        0,
+        0,
+        135,
+        46
+      ],
+      [
+        0,
+        3,
+        396,
+        119
+      ],
+      [
+        0,
+        6,
+        313,
+        25
+      ]
+    ],
+    "normalisasi": [
+      [
+        0.0,
+        0.0,
+        0.5714285714285714,
+        0.42857142857142855
+      ],
+      [
+        0.0,
+        0.0,
+        0.7458563535911602,
+        0.2541436464088398
+      ],
+      [
+        0.0,
+        0.005791505791505791,
+        0.7644787644787645,
+        0.22972972972972974
+      ],
+      [
+        0.0,
+        0.01744186046511628,
+        0.9098837209302325,
+        0.07267441860465117
+      ]
+    ],
+    "aktual": {
+      "1": 7,
+      "2": 181,
+      "3": 518,
+      "4": 344
+    },
+    "prediksi": {
+      "1": 0,
+      "2": 9,
+      "3": 848,
+      "4": 193
+    },
+    "benar": 421,
+    "salah_satu": 570,
+    "salah_dua_atau_lebih": 59,
+    "terlalu_tinggi": 307,
+    "terlalu_rendah": 322,
+    "kelas_tidak_tersedia": [],
+    "dukungan_sangat_terbatas": false,
+    "rating_1": {
+      "penilaian": 7,
+      "uid": 2,
+      "kelompok": 2,
+      "fold": [
+        "5"
+      ],
+      "train_tersedia": {
+        "penilaian": 0,
+        "benar": 0
+      },
+      "train_tidak_tersedia": {
+        "penilaian": 7,
+        "benar": 0
+      }
+    }
+  }
+}

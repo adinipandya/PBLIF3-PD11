@@ -1,0 +1,124 @@
+{
+  "status_dataset": "kandidat_eksperimen",
+  "siap_training": false,
+  "versi_aturan_seleksi": "kandidat-survei-1",
+  "hash_masukan_sha256": {
+    "responses": "d9cce4e9ead92809dfd6e89d3b05bbd25a37d4d9441fc14a9fdf678ce09d6808",
+    "ratings": "d708d9e7e97ac5c07a4067198d4fac824963c9e46aa6396b7135e6825b6e69ab",
+    "validation_report": "7f7cd178ed06253e385d0ab5b0d21c23ad63ff7b14218738b8f9aeafca4142ea"
+  },
+  "jumlah_kiriman_sumber": 65,
+  "jumlah_penilaian_sumber": 1300,
+  "jumlah_kandidat": 1050,
+  "jumlah_dikecualikan": 250,
+  "jumlah_gabungan_dikecualikan": 250,
+  "jumlah_kiriman_kandidat": 56,
+  "jumlah_kiriman_seluruhnya_dikecualikan": 9,
+  "alasan_pengecualian": {
+    "status_bukan_lolos_pemeriksaan_dasar": {
+      "penilaian": 195,
+      "kiriman_unik": 17
+    },
+    "id_makanan_kosong": {
+      "penilaian": 65,
+      "kiriman_unik": 65
+    },
+    "pemetaan_makanan_belum_dikonfirmasi": {
+      "penilaian": 65,
+      "kiriman_unik": 65
+    },
+    "penanda_pemetaan_belum_dikonfirmasi": {
+      "penilaian": 65,
+      "kiriman_unik": 65
+    },
+    "tahan_seluruh_kiriman": {
+      "penilaian": 180,
+      "kiriman_unik": 9
+    }
+  },
+  "distribusi_sebelum": {
+    "rating": {
+      "3": 644,
+      "2": 226,
+      "1": 32,
+      "4": 398
+    },
+    "profil_kiriman": {
+      "target_kalori_asli": {
+        "Rendah (< 300 kkal)": 6,
+        "Tinggi (> 500 kkal)": 11,
+        "Sedang (300-500 kkal)": 48
+      },
+      "prioritas_asli": {
+        "Protein tinggi": 24,
+        "Karbohidrat tinggi": 5,
+        "Seimbang (tidak ada prioritas khusus)": 35,
+        "Lemak tinggi": 1
+      },
+      "status_alergi_asli": {
+        "Tidak ada alergi": 50,
+        "Ya, memiliki alergi": 15
+      }
+    }
+  },
+  "distribusi_sesudah": {
+    "rating": {
+      "3": 518,
+      "2": 181,
+      "4": 344,
+      "1": 7
+    },
+    "profil_penilaian": {
+      "target_kalori_asli": {
+        "Rendah (< 300 kkal)": 94,
+        "Tinggi (> 500 kkal)": 206,
+        "Sedang (300-500 kkal)": 750
+      },
+      "prioritas_asli": {
+        "Protein tinggi": 411,
+        "Karbohidrat tinggi": 76,
+        "Seimbang (tidak ada prioritas khusus)": 544,
+        "Lemak tinggi": 19
+      },
+      "status_alergi_asli": {
+        "Tidak ada alergi": 765,
+        "Ya, memiliki alergi": 285
+      }
+    },
+    "profil_kiriman": {
+      "target_kalori_asli": {
+        "Rendah (< 300 kkal)": 5,
+        "Tinggi (> 500 kkal)": 11,
+        "Sedang (300-500 kkal)": 40
+      },
+      "prioritas_asli": {
+        "Protein tinggi": 22,
+        "Karbohidrat tinggi": 4,
+        "Seimbang (tidak ada prioritas khusus)": 29,
+        "Lemak tinggi": 1
+      },
+      "status_alergi_asli": {
+        "Tidak ada alergi": 41,
+        "Ya, memiliki alergi": 15
+      }
+    }
+  },
+  "kelompok_jawaban_identik_dalam_kandidat": [
+    [
+      "R014",
+      "R033"
+    ],
+    [
+      "R016",
+      "R017"
+    ]
+  ],
+  "keputusan_seleksi": "Hanya lolos dasar, profil dan rating valid, kiriman tidak ditahan, serta ID dan pemetaan makanan terkonfirmasi; alasan dapat tumpang tindih.",
+  "keterbatasan": [
+    "Seimbang berarti tidak ada prioritas khusus, bukan rasio backend.",
+    "Kecocokan ID backend belum diverifikasi; NO Excel bukan bukti PK aktual.",
+    "Ketimpangan kelompok perlu dievaluasi.",
+    "Jawaban identik dapat menunjukkan pengisian berulang, bukan bukti pasti.",
+    "Kandidat belum merupakan persetujuan pelatihan."
+  ]
+}

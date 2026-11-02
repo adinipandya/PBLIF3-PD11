@@ -1,0 +1,97 @@
+{
+  "source_sha256": "165793a78ce360ed10a374714bba59c639f4d0ef23ee305c7011f88ff660f98c",
+  "jumlah_kiriman": 65,
+  "jumlah_penilaian": 1300,
+  "status_penilaian": {
+    "lolos_pemeriksaan_dasar": 1105,
+    "perlu_tinjau": 195
+  },
+  "rating": {
+    "1": 32,
+    "2": 226,
+    "3": 644,
+    "4": 398
+  },
+  "jumlah_kiriman_per_penanda": {
+    "rating_1_tanpa_alergi": 9,
+    "pemetaan_makanan_belum_dikonfirmasi": 65,
+    "konflik_tanpa_alergi_dengan_pilihan": 9,
+    "makna_seimbang_perlu_diselaraskan": 35,
+    "rating_seragam": 5,
+    "kemungkinan_duplikat": 4
+  },
+  "kiriman_rating_1_tanpa_alergi": [
+    "R001",
+    "R002",
+    "R007",
+    "R015",
+    "R035",
+    "R049",
+    "R054",
+    "R058",
+    "R059"
+  ],
+  "kelompok_jawaban_identik": [
+    [
+      "R014",
+      "R033"
+    ],
+    [
+      "R016",
+      "R017"
+    ]
+  ],
+  "pemetaan_makanan_belum_dikonfirmasi": [
+    "Capcay Kuah (Ayam)"
+  ],
+  "siap_ml": false,
+  "catatan": "Lolos pemeriksaan dasar bukan persetujuan untuk pelatihan ML.",
+  "kesalahan": [],
+  "peringatan": [
+    {
+      "jenis": "id_database_belum_diverifikasi",
+      "lokasi": "database aplikasi tidak diakses"
+    }
+  ],
+  "nilai_kosong_per_kolom": {},
+  "nilai_tidak_valid_per_kolom": {},
+  "distribusi_profil": {
+    "Berapa target kalori Anda untuk satu kali makan?": {
+      "Rendah (< 300 kkal)": 6,
+      "Tinggi (> 500 kkal)": 11,
+      "Sedang (300-500 kkal)": 48
+    },
+    "Nutrisi apa yang paling Anda prioritaskan pada makanan?": {
+      "Protein tinggi": 24,
+      "Karbohidrat tinggi": 5,
+      "Seimbang (tidak ada prioritas khusus)": 35,
+      "Lemak tinggi": 1
+    },
+    "Apakah Anda memiliki alergi terhadap makanan?": {
+      "Tidak ada alergi": 50,
+      "Ya, memiliki alergi": 15
+    }
+  },
+  "jumlah_penilaian_per_penanda": {
+    "rating_1_tanpa_alergi": 25,
+    "pemetaan_makanan_belum_dikonfirmasi": 65,
+    "konflik_tanpa_alergi_dengan_pilihan": 180,
+    "makna_seimbang_perlu_diselaraskan": 700,
+    "rating_seragam": 100,
+    "kemungkinan_duplikat": 80
+  },
+  "jumlah_kiriman_terdampak_unik": 65,
+  "versi_konfigurasi_pemetaan": "survei-PD11-1",
+  "verifikasi_id_referensi": "Belum diverifikasi terhadap database; migrasi menggunakan auto-increment; importer memakai NO sebagai PK.",
+  "alasan_belum_siap_ml": [
+    "Tahap persiapan: data final belum disetujui untuk pelatihan.",
+    "ID database belum diverifikasi terhadap database terpasang.",
+    "Pemetaan Capcay belum dikonfirmasi.",
+    "Makna Seimbang survei perlu ditinjau.",
+    "Konflik alergi atau rating 1 tanpa alergi perlu ditinjau."
+  ],
+  "hash_sumber": {
+    "survei_sha256": "165793a78ce360ed10a374714bba59c639f4d0ef23ee305c7011f88ff660f98c",
+    "makanan_sha256": "983ac7798ef6d5e4f307191c1f881f2940a0f76c12c601b3909afd100fd1dd79"
+  }
+}

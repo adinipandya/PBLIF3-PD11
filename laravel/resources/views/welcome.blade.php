@@ -26,8 +26,7 @@
         <section class="hero">
             <h1>Personalisasi Nutrisi Anda Secara Instan</h1>
             <p>
-                Temukan pilihan makanan yang sesuai dengan kebutuhan
-                gizi dan tujuan kesehatan Anda.
+                Temukan makanan sesuai kebutuhan gizi Anda.
             </p>
             <a href="{{ url('/kalori') }}" class="btn-primary">
                 Mulai Personalisasi
@@ -44,32 +43,28 @@
             <div class="steps-grid">
                 <div class="step-card">
                     <div class="step-number">01</div>
-                    <p>Pilih target kalori sesuai kebutuhan tubuh.</p>
+                    <p>Pilih target kalori</p>
                 </div>
 
                 <div class="step-card">
                     <div class="step-number">02</div>
-                    <p>Tentukan prioritas nutrisi yang diinginkan.</p>
+                    <p>Tentukan prioritas nutrisi</p>
                 </div>
 
                 <div class="step-card">
                     <div class="step-number">03</div>
-                    <p>Pilih alergi atau pantangan makanan.</p>
+                    <p>Pilih alergi</p>
                 </div>
 
                 <div class="step-card">
                     <div class="step-number">04</div>
-                    <p>Dapatkan 3 rekomendasi makanan berdasarkan kebutuhan Anda.</p>
+                    <p>Dapatkan maksimal 3 rekomendasi</p>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="footer">
-        © 2026 NutriRec AI Kiosk. All rights reserved.
-        <br>
-        Informasi nutrisi disediakan untuk tujuan edukasi.
-    </footer>
+    <footer class="footer">© 2026 NutriRec AI Kiosk. All rights reserved.</footer>
 
 </body>
 </html>

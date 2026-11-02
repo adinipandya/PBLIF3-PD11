@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 
-    @vite('resources/css/style.css')
+    @vite(['resources/css/style.css', 'resources/js/app.js'])
 </head>
 <body>
 
@@ -28,19 +28,11 @@
     <main class="main-content">
 
         <section class="hero">
+            <span class="screen-step">LANGKAH 3 DARI 3 • ALERGI</span>
             <h1>Apakah Anda memiliki alergi makanan?</h1>
-            <p>
-                Informasikan kondisi alergi makanan Anda agar rekomendasi
-                yang diberikan sesuai dengan kebutuhan.
-            </p>
         </section>
 
         <section class="steps-container">
-
-            <div class="steps-heading">
-                <span>LANGKAH 03</span>
-                <h2>Konfirmasi Alergi Makanan</h2>
-            </div>
 
             <div class="allergy-question-buttons">
 
@@ -67,11 +59,7 @@
 
     </main>
 
-    <footer class="footer">
-        © 2026 NutriRec AI Kiosk. All rights reserved.
-        <br>
-        Informasi nutrisi disediakan untuk tujuan edukasi.
-    </footer>
+    <footer class="footer">© 2026 NutriRec AI Kiosk. All rights reserved.</footer>
 
 </body>
 </html>

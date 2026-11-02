@@ -1889,3 +1889,67 @@ body.notfound-page {
         transform: rotate(360deg);
     }
 }
+[hidden] { display: none !important; }
+
+/* Identitas visual prototipe: krem, amber, judul serif, dan kartu pilihan. */
+:root { --background: #fff9ef; --text: #15172b; --muted: #55515c; --border: #81796c; }
+body, .result-page, .loading-page { background: #fff9ef; color: #15172b; font: 16px/1.5 Arial, sans-serif; }
+.navbar { min-height: 56px; padding: 0 24px; background: #fff9ef; border-bottom: 1px solid #f1e9db; box-shadow: none; }
+.logo, .hero h1, .result-heading h1, .loading-content h1, .food-card h2, .steps-heading h2 { font-family: Georgia, serif; }
+.logo { color: #15172b; font-size: 22px; }
+.logo span { color: inherit; }
+.nav-status { background: #fbf3e2; border: 1px solid #e5dac6; font-size: 14px; }
+.main-content { max-width: 1200px; padding: 36px 32px 40px; }
+.hero { padding: 18px 0 8px; margin-bottom: 24px; background: transparent; border-radius: 0; box-shadow: none; overflow: visible; }
+.hero::before, .hero::after { display: none; }
+.hero h1 { max-width: 1040px; font-size: clamp(28px, 3.3vw, 40px); line-height: 1.25; margin-bottom: 16px; }
+.hero p { max-width: 780px; color: #55515c; font-size: 18px; line-height: 1.6; margin-bottom: 24px; }
+.steps-container { background: transparent; box-shadow: none; border: 0; padding: 0; }
+.steps-heading { text-align: center; margin-bottom: 24px; }
+.steps-heading span { display: inline-block; background: #fbf3e2; border: 1px solid #805600; border-radius: 50px; padding: 8px 16px; color: #15172b; font-size: 14px; }
+.steps-heading h2 { margin-top: 12px; font-size: 24px; color: #15172b; }
+.btn-primary, .btn-next, .result-finish { background: #fdaf00; color: #15172b; border: 1.5px solid #15172b; border-radius: 999px; font: 700 18px/1.3 Georgia, serif; min-height: 56px; padding: 14px 28px; }
+.btn-back { background: #fbf3e2; color: #15172b; border: 1.5px solid #15172b; border-radius: 999px; font: 700 18px/1.3 Georgia, serif; min-height: 56px; padding: 14px 28px; }
+.btn-primary:hover, .btn-next:hover, .result-finish:hover, .btn-back:hover { transform: none; background: #f6c04f; color: #15172b; }
+.btn-next:disabled { opacity: .55; cursor: not-allowed; }
+.steps-grid { gap: 16px; }
+.step-card { background: #fbf3e2; border: 1px solid #ded3bd; border-radius: 12px; box-shadow: none; }
+.step-number { background: #fdaf00; color: #15172b; }
+.calorie-options { gap: 16px; }
+.calorie-card, .priority-options .calorie-card, .allergy-card { position: relative; min-height: 220px; background: #fbf3e2; border: 1.5px solid #81796c; border-radius: 12px; box-shadow: none; padding: 26px 18px; }
+.calorie-card:hover, .calorie-card:has(input:checked), .allergy-card:has(input:checked) { background: #fdaf00; border: 2px solid #15172b; transform: none; box-shadow: none; }
+.calorie-card h3, .priority-options .calorie-card h3 { color: #15172b; font: 700 24px/1.3 Georgia, serif; }
+.calorie-card p, .priority-options .calorie-card p { color: #49444a; font: 16px/1.5 Arial, sans-serif; }
+.calorie-icon, .priority-options .calorie-icon, .allergy-card .calorie-icon { width: 60px; height: 60px; margin: 0 auto 16px; border-radius: 50%; background: #fff9ef; color: #15172b; display: grid; place-items: center; font-size: 28px; }
+.calorie-card .choice-check { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 26px; height: 26px; border: 1.5px solid #81796c; border-radius: 50%; color: transparent; background: #fff9ef; }
+.allergy-card .choice-check { border-radius: 5px; }
+.calorie-card:has(input:checked) .choice-check { color: #fff; background: #15172b; border-color: #15172b; }
+.calorie-card:has(input:focus-visible) { outline: 3px solid #6b54c6; outline-offset: 4px; }
+.allergy-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.allergy-card { min-height: 144px; }
+.allergy-question-buttons { gap: 16px; flex-wrap: wrap; }
+.allergy-question-buttons .btn-next:first-child { background: #fbf3e2; }
+.navigation-buttons { margin-top: 32px; gap: 16px; }
+.footer { background: #fff9ef; border-top: 1px solid #e9deca; color: #55515c; padding: 20px; font-size: 16px; }
+.result-main { max-width: 1200px; padding: 42px 32px; }
+.result-heading h1, .loading-content h1 { font-size: clamp(28px, 3vw, 40px); }
+.result-info span { background: #fbf3e2; border: 1px solid #d8cbb5; color: #15172b; }
+.result-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.result-grid .food-card, .result-grid .food-card.best-match { width: auto; min-width: 0; background: #fbf3e2; border: 1.5px solid #81796c; border-radius: 12px; box-shadow: none; }
+.result-grid .food-card:first-child { border: 2px solid #15172b; }
+.result-grid .food-rank { background: #fdaf00; color: #15172b; }
+.result-grid .food-card h2 { overflow-wrap: anywhere; }
+.result-grid .food-nutrition { background: #fff9ef; }
+.result-main > p { margin: 24px 0; color: #55515c; }
+:is(a, button, input):focus-visible { outline: 3px solid #6b54c6; outline-offset: 4px; }
+@media (max-width: 760px) {
+    .navbar { padding: 0 16px; }
+    .nav-status { font-size: 12px; }
+    .main-content, .result-main { padding: 28px 18px; }
+    .calorie-options, .priority-options, .result-grid { grid-template-columns: 1fr; }
+    .allergy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .calorie-card, .priority-options .calorie-card { min-height: 120px; }
+    .allergy-card { min-height: 144px; }
+    .navigation-buttons { flex-wrap: wrap; }
+    .btn-back, .btn-next { flex: 1 1 140px; }
+}

@@ -1,0 +1,1162 @@
+{
+  "model": {
+    "Decision Tree": {
+      "penilaian": 1050,
+      "kesalahan": 582,
+      "akurasi": 0.44571428571428573,
+      "mae": 0.6257142857142857,
+      "confusion_matrix": {
+        "1": {
+          "1": 0,
+          "2": 0,
+          "3": 4,
+          "4": 3
+        },
+        "2": {
+          "1": 0,
+          "2": 2,
+          "3": 139,
+          "4": 40
+        },
+        "3": {
+          "1": 0,
+          "2": 11,
+          "3": 429,
+          "4": 78
+        },
+        "4": {
+          "1": 0,
+          "2": 25,
+          "3": 282,
+          "4": 37
+        }
+      },
+      "arah_kesalahan": {
+        "prediksi_lebih_rendah": 318,
+        "prediksi_lebih_tinggi": 264
+      },
+      "per_profil_dan_makanan": {
+        "target_kalori": {
+          "Rendah": {
+            "penilaian": 94,
+            "uid": 5,
+            "kesalahan": 81,
+            "mae": 1.2446808510638299
+          },
+          "Sedang": {
+            "penilaian": 750,
+            "uid": 40,
+            "kesalahan": 387,
+            "mae": 0.5613333333333334
+          },
+          "Tinggi": {
+            "penilaian": 206,
+            "uid": 11,
+            "kesalahan": 114,
+            "mae": 0.5776699029126213
+          }
+        },
+        "prioritas": {
+          "Karbohidrat": {
+            "penilaian": 76,
+            "uid": 4,
+            "kesalahan": 64,
+            "mae": 1.1710526315789473
+          },
+          "Lemak": {
+            "penilaian": 19,
+            "uid": 1,
+            "kesalahan": 9,
+            "mae": 0.47368421052631576
+          },
+          "Protein": {
+            "penilaian": 411,
+            "uid": 22,
+            "kesalahan": 235,
+            "mae": 0.6739659367396593
+          },
+          "Seimbang (tidak ada prioritas khusus)": {
+            "penilaian": 544,
+            "uid": 29,
+            "kesalahan": 274,
+            "mae": 0.5183823529411765
+          }
+        },
+        "status_alergi": {
+          "False": {
+            "penilaian": 765,
+            "uid": 41,
+            "kesalahan": 442,
+            "mae": 0.6169934640522876
+          },
+          "True": {
+            "penilaian": 285,
+            "uid": 15,
+            "kesalahan": 140,
+            "mae": 0.6491228070175439
+          }
+        },
+        "nama_makanan_dataset": {
+          "Ayam Bakar Taliwang": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 35,
+            "mae": 0.6607142857142857
+          },
+          "Ayam Geprek": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 36,
+            "mae": 0.7678571428571429
+          },
+          "Ayam Goreng": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 27,
+            "mae": 0.5535714285714286
+          },
+          "Bakso Sapi Kuah (Tanpa Mie)": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 34,
+            "mae": 0.6727272727272727
+          },
+          "Bihun Goreng Sayur": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 27,
+            "mae": 0.5555555555555556
+          },
+          "Bubur Ayam": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 26,
+            "mae": 0.5370370370370371
+          },
+          "Dendeng Balado Basah": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 34,
+            "mae": 0.6545454545454545
+          },
+          "Lemper Ayam": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 33,
+            "mae": 0.6727272727272727
+          },
+          "Lontong Sayur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 26,
+            "mae": 0.5272727272727272
+          },
+          "Mie Ayam": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 34,
+            "mae": 0.6607142857142857
+          },
+          "Nasi Goreng": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 27,
+            "mae": 0.5636363636363636
+          },
+          "Nasi Padang Ayam Pop": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 36,
+            "mae": 0.75
+          },
+          "Nasi Putih (Dijual Terpisah)": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 37,
+            "mae": 0.7592592592592593
+          },
+          "Nasi Uduk": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 25,
+            "mae": 0.5272727272727272
+          },
+          "Pecel Lele": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 29,
+            "mae": 0.5892857142857143
+          },
+          "Rawon Daging Sapi": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 32,
+            "mae": 0.6785714285714286
+          },
+          "Sayur Sop": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 26,
+            "mae": 0.5636363636363636
+          },
+          "Soto Ayam Bening": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 33,
+            "mae": 0.6785714285714286
+          },
+          "Sup Tahu Telur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 25,
+            "mae": 0.509090909090909
+          }
+        },
+        "fold": {
+          "1": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 105,
+            "mae": 0.6057692307692307
+          },
+          "2": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 103,
+            "mae": 0.5432692307692307
+          },
+          "3": {
+            "penilaian": 220,
+            "uid": 12,
+            "kesalahan": 128,
+            "mae": 0.65
+          },
+          "4": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 114,
+            "mae": 0.6231884057971014
+          },
+          "5": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 132,
+            "mae": 0.7053140096618358
+          }
+        }
+      },
+      "rating_1": {
+        "jumlah": 7,
+        "benar": 0,
+        "uid": 2
+      }
+    },
+    "Dummy": {
+      "penilaian": 1050,
+      "kesalahan": 532,
+      "akurasi": 0.4933333333333333,
+      "mae": 0.5133333333333333,
+      "confusion_matrix": {
+        "1": {
+          "1": 0,
+          "2": 0,
+          "3": 7,
+          "4": 0
+        },
+        "2": {
+          "1": 0,
+          "2": 0,
+          "3": 181,
+          "4": 0
+        },
+        "3": {
+          "1": 0,
+          "2": 0,
+          "3": 518,
+          "4": 0
+        },
+        "4": {
+          "1": 0,
+          "2": 0,
+          "3": 344,
+          "4": 0
+        }
+      },
+      "arah_kesalahan": {
+        "prediksi_lebih_rendah": 344,
+        "prediksi_lebih_tinggi": 188
+      },
+      "per_profil_dan_makanan": {
+        "target_kalori": {
+          "Rendah": {
+            "penilaian": 94,
+            "uid": 5,
+            "kesalahan": 60,
+            "mae": 0.6382978723404256
+          },
+          "Sedang": {
+            "penilaian": 750,
+            "uid": 40,
+            "kesalahan": 363,
+            "mae": 0.49333333333333335
+          },
+          "Tinggi": {
+            "penilaian": 206,
+            "uid": 11,
+            "kesalahan": 109,
+            "mae": 0.529126213592233
+          }
+        },
+        "prioritas": {
+          "Karbohidrat": {
+            "penilaian": 76,
+            "uid": 4,
+            "kesalahan": 54,
+            "mae": 0.7105263157894737
+          },
+          "Lemak": {
+            "penilaian": 19,
+            "uid": 1,
+            "kesalahan": 14,
+            "mae": 0.7368421052631579
+          },
+          "Protein": {
+            "penilaian": 411,
+            "uid": 22,
+            "kesalahan": 224,
+            "mae": 0.559610705596107
+          },
+          "Seimbang (tidak ada prioritas khusus)": {
+            "penilaian": 544,
+            "uid": 29,
+            "kesalahan": 240,
+            "mae": 0.4430147058823529
+          }
+        },
+        "status_alergi": {
+          "False": {
+            "penilaian": 765,
+            "uid": 41,
+            "kesalahan": 390,
+            "mae": 0.5098039215686274
+          },
+          "True": {
+            "penilaian": 285,
+            "uid": 15,
+            "kesalahan": 142,
+            "mae": 0.5228070175438596
+          }
+        },
+        "nama_makanan_dataset": {
+          "Ayam Bakar Taliwang": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 31,
+            "mae": 0.5535714285714286
+          },
+          "Ayam Geprek": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 33,
+            "mae": 0.5892857142857143
+          },
+          "Ayam Goreng": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 25,
+            "mae": 0.44642857142857145
+          },
+          "Bakso Sapi Kuah (Tanpa Mie)": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 31,
+            "mae": 0.5636363636363636
+          },
+          "Bihun Goreng Sayur": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 23,
+            "mae": 0.46296296296296297
+          },
+          "Bubur Ayam": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 26,
+            "mae": 0.5
+          },
+          "Dendeng Balado Basah": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 26,
+            "mae": 0.4727272727272727
+          },
+          "Lemper Ayam": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 30,
+            "mae": 0.5454545454545454
+          },
+          "Lontong Sayur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 26,
+            "mae": 0.4727272727272727
+          },
+          "Mie Ayam": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 32,
+            "mae": 0.5714285714285714
+          },
+          "Nasi Goreng": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 27,
+            "mae": 0.509090909090909
+          },
+          "Nasi Padang Ayam Pop": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 30,
+            "mae": 0.5357142857142857
+          },
+          "Nasi Putih (Dijual Terpisah)": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 35,
+            "mae": 0.6481481481481481
+          },
+          "Nasi Uduk": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 23,
+            "mae": 0.43636363636363634
+          },
+          "Pecel Lele": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 27,
+            "mae": 0.48214285714285715
+          },
+          "Rawon Daging Sapi": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 29,
+            "mae": 0.5357142857142857
+          },
+          "Sayur Sop": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 25,
+            "mae": 0.45454545454545453
+          },
+          "Soto Ayam Bening": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 29,
+            "mae": 0.5357142857142857
+          },
+          "Sup Tahu Telur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 24,
+            "mae": 0.43636363636363634
+          }
+        },
+        "fold": {
+          "1": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 84,
+            "mae": 0.40384615384615385
+          },
+          "2": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 87,
+            "mae": 0.4182692307692308
+          },
+          "3": {
+            "penilaian": 220,
+            "uid": 12,
+            "kesalahan": 119,
+            "mae": 0.5409090909090909
+          },
+          "4": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 114,
+            "mae": 0.5507246376811594
+          },
+          "5": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 128,
+            "mae": 0.6521739130434783
+          }
+        }
+      },
+      "rating_1": {
+        "jumlah": 7,
+        "benar": 0,
+        "uid": 2
+      }
+    },
+    "KNN": {
+      "penilaian": 1050,
+      "kesalahan": 636,
+      "akurasi": 0.39428571428571424,
+      "mae": 0.72,
+      "confusion_matrix": {
+        "1": {
+          "1": 0,
+          "2": 2,
+          "3": 3,
+          "4": 2
+        },
+        "2": {
+          "1": 1,
+          "2": 30,
+          "3": 110,
+          "4": 40
+        },
+        "3": {
+          "1": 0,
+          "2": 92,
+          "3": 298,
+          "4": 128
+        },
+        "4": {
+          "1": 1,
+          "2": 71,
+          "3": 186,
+          "4": 86
+        }
+      },
+      "arah_kesalahan": {
+        "prediksi_lebih_rendah": 351,
+        "prediksi_lebih_tinggi": 285
+      },
+      "per_profil_dan_makanan": {
+        "target_kalori": {
+          "Rendah": {
+            "penilaian": 94,
+            "uid": 5,
+            "kesalahan": 76,
+            "mae": 1.0851063829787233
+          },
+          "Sedang": {
+            "penilaian": 750,
+            "uid": 40,
+            "kesalahan": 423,
+            "mae": 0.66
+          },
+          "Tinggi": {
+            "penilaian": 206,
+            "uid": 11,
+            "kesalahan": 137,
+            "mae": 0.7718446601941747
+          }
+        },
+        "prioritas": {
+          "Karbohidrat": {
+            "penilaian": 76,
+            "uid": 4,
+            "kesalahan": 53,
+            "mae": 0.9473684210526315
+          },
+          "Lemak": {
+            "penilaian": 19,
+            "uid": 1,
+            "kesalahan": 9,
+            "mae": 0.5789473684210527
+          },
+          "Protein": {
+            "penilaian": 411,
+            "uid": 22,
+            "kesalahan": 265,
+            "mae": 0.7834549878345499
+          },
+          "Seimbang (tidak ada prioritas khusus)": {
+            "penilaian": 544,
+            "uid": 29,
+            "kesalahan": 309,
+            "mae": 0.6452205882352942
+          }
+        },
+        "status_alergi": {
+          "False": {
+            "penilaian": 765,
+            "uid": 41,
+            "kesalahan": 461,
+            "mae": 0.6915032679738562
+          },
+          "True": {
+            "penilaian": 285,
+            "uid": 15,
+            "kesalahan": 175,
+            "mae": 0.7964912280701755
+          }
+        },
+        "nama_makanan_dataset": {
+          "Ayam Bakar Taliwang": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 34,
+            "mae": 0.6607142857142857
+          },
+          "Ayam Geprek": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 36,
+            "mae": 0.8392857142857143
+          },
+          "Ayam Goreng": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 28,
+            "mae": 0.5892857142857143
+          },
+          "Bakso Sapi Kuah (Tanpa Mie)": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 42,
+            "mae": 0.9272727272727272
+          },
+          "Bihun Goreng Sayur": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 28,
+            "mae": 0.5555555555555556
+          },
+          "Bubur Ayam": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 30,
+            "mae": 0.6481481481481481
+          },
+          "Dendeng Balado Basah": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 35,
+            "mae": 0.8
+          },
+          "Lemper Ayam": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 33,
+            "mae": 0.7090909090909091
+          },
+          "Lontong Sayur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 32,
+            "mae": 0.6181818181818182
+          },
+          "Mie Ayam": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 40,
+            "mae": 0.8571428571428571
+          },
+          "Nasi Goreng": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 29,
+            "mae": 0.6
+          },
+          "Nasi Padang Ayam Pop": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 36,
+            "mae": 0.8214285714285714
+          },
+          "Nasi Putih (Dijual Terpisah)": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 44,
+            "mae": 1.037037037037037
+          },
+          "Nasi Uduk": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 26,
+            "mae": 0.5272727272727272
+          },
+          "Pecel Lele": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 33,
+            "mae": 0.6785714285714286
+          },
+          "Rawon Daging Sapi": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 38,
+            "mae": 0.8571428571428571
+          },
+          "Sayur Sop": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 31,
+            "mae": 0.6181818181818182
+          },
+          "Soto Ayam Bening": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 35,
+            "mae": 0.8035714285714286
+          },
+          "Sup Tahu Telur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 26,
+            "mae": 0.5272727272727272
+          }
+        },
+        "fold": {
+          "1": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 129,
+            "mae": 0.7403846153846154
+          },
+          "2": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 126,
+            "mae": 0.6730769230769231
+          },
+          "3": {
+            "penilaian": 220,
+            "uid": 12,
+            "kesalahan": 120,
+            "mae": 0.6272727272727273
+          },
+          "4": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 134,
+            "mae": 0.8357487922705314
+          },
+          "5": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 127,
+            "mae": 0.7294685990338164
+          }
+        }
+      },
+      "rating_1": {
+        "jumlah": 7,
+        "benar": 0,
+        "uid": 2
+      }
+    },
+    "Random Forest": {
+      "penilaian": 1050,
+      "kesalahan": 629,
+      "akurasi": 0.40095238095238095,
+      "mae": 0.6580952380952381,
+      "confusion_matrix": {
+        "1": {
+          "1": 0,
+          "2": 0,
+          "3": 4,
+          "4": 3
+        },
+        "2": {
+          "1": 0,
+          "2": 0,
+          "3": 135,
+          "4": 46
+        },
+        "3": {
+          "1": 0,
+          "2": 3,
+          "3": 396,
+          "4": 119
+        },
+        "4": {
+          "1": 0,
+          "2": 6,
+          "3": 313,
+          "4": 25
+        }
+      },
+      "arah_kesalahan": {
+        "prediksi_lebih_rendah": 322,
+        "prediksi_lebih_tinggi": 307
+      },
+      "per_profil_dan_makanan": {
+        "target_kalori": {
+          "Rendah": {
+            "penilaian": 94,
+            "uid": 5,
+            "kesalahan": 88,
+            "mae": 1.202127659574468
+          },
+          "Sedang": {
+            "penilaian": 750,
+            "uid": 40,
+            "kesalahan": 406,
+            "mae": 0.5813333333333334
+          },
+          "Tinggi": {
+            "penilaian": 206,
+            "uid": 11,
+            "kesalahan": 135,
+            "mae": 0.6893203883495146
+          }
+        },
+        "prioritas": {
+          "Karbohidrat": {
+            "penilaian": 76,
+            "uid": 4,
+            "kesalahan": 68,
+            "mae": 0.9605263157894737
+          },
+          "Lemak": {
+            "penilaian": 19,
+            "uid": 1,
+            "kesalahan": 14,
+            "mae": 0.7368421052631579
+          },
+          "Protein": {
+            "penilaian": 411,
+            "uid": 22,
+            "kesalahan": 263,
+            "mae": 0.7566909975669099
+          },
+          "Seimbang (tidak ada prioritas khusus)": {
+            "penilaian": 544,
+            "uid": 29,
+            "kesalahan": 284,
+            "mae": 0.5386029411764706
+          }
+        },
+        "status_alergi": {
+          "False": {
+            "penilaian": 765,
+            "uid": 41,
+            "kesalahan": 463,
+            "mae": 0.6431372549019608
+          },
+          "True": {
+            "penilaian": 285,
+            "uid": 15,
+            "kesalahan": 166,
+            "mae": 0.6982456140350877
+          }
+        },
+        "nama_makanan_dataset": {
+          "Ayam Bakar Taliwang": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 37,
+            "mae": 0.7321428571428571
+          },
+          "Ayam Geprek": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 38,
+            "mae": 0.8035714285714286
+          },
+          "Ayam Goreng": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 33,
+            "mae": 0.625
+          },
+          "Bakso Sapi Kuah (Tanpa Mie)": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 38,
+            "mae": 0.7272727272727273
+          },
+          "Bihun Goreng Sayur": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 27,
+            "mae": 0.5370370370370371
+          },
+          "Bubur Ayam": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 32,
+            "mae": 0.6666666666666666
+          },
+          "Dendeng Balado Basah": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 33,
+            "mae": 0.6363636363636364
+          },
+          "Lemper Ayam": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 33,
+            "mae": 0.6363636363636364
+          },
+          "Lontong Sayur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 28,
+            "mae": 0.5454545454545454
+          },
+          "Mie Ayam": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 36,
+            "mae": 0.6964285714285714
+          },
+          "Nasi Goreng": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 29,
+            "mae": 0.5818181818181818
+          },
+          "Nasi Padang Ayam Pop": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 35,
+            "mae": 0.7142857142857143
+          },
+          "Nasi Putih (Dijual Terpisah)": {
+            "penilaian": 54,
+            "uid": 54,
+            "kesalahan": 41,
+            "mae": 0.9074074074074074
+          },
+          "Nasi Uduk": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 26,
+            "mae": 0.5272727272727272
+          },
+          "Pecel Lele": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 31,
+            "mae": 0.5892857142857143
+          },
+          "Rawon Daging Sapi": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 39,
+            "mae": 0.7857142857142857
+          },
+          "Sayur Sop": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 30,
+            "mae": 0.5636363636363636
+          },
+          "Soto Ayam Bening": {
+            "penilaian": 56,
+            "uid": 56,
+            "kesalahan": 34,
+            "mae": 0.6607142857142857
+          },
+          "Sup Tahu Telur": {
+            "penilaian": 55,
+            "uid": 55,
+            "kesalahan": 29,
+            "mae": 0.5636363636363636
+          }
+        },
+        "fold": {
+          "1": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 117,
+            "mae": 0.6971153846153846
+          },
+          "2": {
+            "penilaian": 208,
+            "uid": 11,
+            "kesalahan": 123,
+            "mae": 0.6490384615384616
+          },
+          "3": {
+            "penilaian": 220,
+            "uid": 12,
+            "kesalahan": 133,
+            "mae": 0.6181818181818182
+          },
+          "4": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 124,
+            "mae": 0.6231884057971014
+          },
+          "5": {
+            "penilaian": 207,
+            "uid": 11,
+            "kesalahan": 132,
+            "mae": 0.7053140096618358
+          }
+        }
+      },
+      "rating_1": {
+        "jumlah": 7,
+        "benar": 0,
+        "uid": 2
+      }
+    }
+  },
+  "fold_diagnostics": [
+    {
+      "fold": 1,
+      "train": {
+        "baris": 842,
+        "uid": 45,
+        "kelompok": 44,
+        "kelas": {
+          "1": 7,
+          "2": 131,
+          "3": 394,
+          "4": 310
+        },
+        "kelas_tidak_tersedia": []
+      },
+      "test": {
+        "baris": 208,
+        "uid": 11,
+        "kelompok": 10,
+        "kelas": {
+          "1": 0,
+          "2": 50,
+          "3": 124,
+          "4": 34
+        },
+        "kelas_tidak_tersedia": [
+          1
+        ]
+      }
+    },
+    {
+      "fold": 2,
+      "train": {
+        "baris": 842,
+        "uid": 45,
+        "kelompok": 44,
+        "kelas": {
+          "1": 7,
+          "2": 140,
+          "3": 397,
+          "4": 298
+        },
+        "kelas_tidak_tersedia": []
+      },
+      "test": {
+        "baris": 208,
+        "uid": 11,
+        "kelompok": 10,
+        "kelas": {
+          "1": 0,
+          "2": 41,
+          "3": 121,
+          "4": 46
+        },
+        "kelas_tidak_tersedia": [
+          1
+        ]
+      }
+    },
+    {
+      "fold": 3,
+      "train": {
+        "baris": 830,
+        "uid": 44,
+        "kelompok": 42,
+        "kelas": {
+          "1": 7,
+          "2": 153,
+          "3": 417,
+          "4": 253
+        },
+        "kelas_tidak_tersedia": []
+      },
+      "test": {
+        "baris": 220,
+        "uid": 12,
+        "kelompok": 12,
+        "kelas": {
+          "1": 0,
+          "2": 28,
+          "3": 101,
+          "4": 91
+        },
+        "kelas_tidak_tersedia": [
+          1
+        ]
+      }
+    },
+    {
+      "fold": 4,
+      "train": {
+        "baris": 843,
+        "uid": 45,
+        "kelompok": 43,
+        "kelas": {
+          "1": 7,
+          "2": 158,
+          "3": 425,
+          "4": 253
+        },
+        "kelas_tidak_tersedia": []
+      },
+      "test": {
+        "baris": 207,
+        "uid": 11,
+        "kelompok": 11,
+        "kelas": {
+          "1": 0,
+          "2": 23,
+          "3": 93,
+          "4": 91
+        },
+        "kelas_tidak_tersedia": [
+          1
+        ]
+      }
+    },
+    {
+      "fold": 5,
+      "train": {
+        "baris": 843,
+        "uid": 45,
+        "kelompok": 43,
+        "kelas": {
+          "1": 0,
+          "2": 142,
+          "3": 439,
+          "4": 262
+        },
+        "kelas_tidak_tersedia": [
+          1
+        ]
+      },
+      "test": {
+        "baris": 207,
+        "uid": 11,
+        "kelompok": 11,
+        "kelas": {
+          "1": 7,
+          "2": 39,
+          "3": 79,
+          "4": 82
+        },
+        "kelas_tidak_tersedia": []
+      }
+    }
+  ],
+  "catatan": [
+    "Analisis deskriptif OOF; bukan evaluasi produksi atau uji signifikansi.",
+    "Subkelompok kecil tidak mendukung klaim generalisasi.",
+    "Probabilitas belum terkalibrasi; tidak mengukur keamanan alergi.",
+    "Fold tanpa kelas pada train tidak dapat memprediksi kelas tersebut.",
+    "Tidak ada pelatihan ulang atau pemilihan model otomatis."
+  ]
+}
