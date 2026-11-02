@@ -6,9 +6,10 @@ Uji endpoint prototipe rekomendasi content-based
 
 from decimal import Decimal
 
+import pytest
+
 from fastapi.testclient import TestClient
 from fastapi import Response
-
 
 # ─── Helper seeder ────────────────────────────────────────────────────────────
 
@@ -148,32 +149,61 @@ def test_rekomendasi_skor_prioritas_seimbang(client: TestClient, db_session, see
 
 # ─── Alergi ───────────────────────────────────────────────────────────────────
 
-def test_rekomendasi_alergi_menolak_data(client: TestClient, db_session, seed_referensi):
-    from app.models.makanan import Makanan, InformasiGizi
-    from app.models.alergen import KandunganAlergen
+def test_rekomendasi_alergi_menolak_data(
+    client: TestClient, db_session, seed_referensi
+):
+    # Pengguna memilih alergi Telur (id=1).
 
-    # Alergen user: Telur (id=1)
+    # 201: mengandung Telur dan belum diverifikasi → ditolak.
+    _buat_menu(
+        db_session, 201, "Menu Belum Terverifikasi",
+        150, 10, 8, 8, "Rendah",
+        [1], status="Belum diverifikasi",
+    )
 
-    # 201: alergen Telur berstatus Belum diverifikasi → harus ditolak
-    _buat_menu(db_session, 201, "Menu Belum Terverifikasi", 150, 10, 8, 8, "Rendah", [1], status="Belum diverifikasi")
+    # 202: tidak memiliki relasi alergen → ditolak.
+    _buat_menu(
+        db_session, 202, "Menu Tanpa Relasi",
+        150, 10, 8, 8, "Rendah",
+    )
 
-    # 202: tidak memiliki relasi alergen sama sekali → tidak boleh dianggap aman
-    _buat_menu(db_session, 202, "Menu Tanpa Relasi", 150, 10, 8, 8, "Rendah")
+    # 203: mengandung Kedelai terverifikasi, bukan Telur → lolos.
+    _buat_menu(
+        db_session, 203, "Menu Kedelai Terverifikasi",
+        150, 10, 8, 8, "Rendah",
+        [2], status="Terverifikasi",
+    )
 
-    # 203: alergen Kedelai (id=2) yang TERVERIFIKASI, bukan alergen user → boleh lolos
-    _buat_menu(db_session, 203, "Menu Aman", 150, 10, 8, 8, "Rendah", [2], status="Terverifikasi")
+    # 204: mengandung Telur terverifikasi → ditolak.
+    _buat_menu(
+        db_session, 204, "Menu Tabrakan",
+        150, 10, 8, 8, "Rendah",
+        [1], status="Terverifikasi",
+    )
 
-    # 204: alergen Telur (id=1) yang TERVERIFIKASI → tabrakan dengan user → ditolak
-    _buat_menu(db_session, 204, "Menu Tabrakan", 150, 10, 8, 8, "Rendah", [1], status="Terverifikasi")
+    # 205: mengandung Kedelai, tetapi belum diverifikasi → ditolak.
+    _buat_menu(
+        db_session, 205, "Menu Kedelai Belum Diverifikasi",
+        150, 10, 8, 8, "Rendah",
+        [2], status="Belum diverifikasi",
+    )
 
-    resp = _kirim_permintaan(client, status_alergi=True, alergen_ids=[1])
+    resp = _kirim_permintaan(
+        client,
+        status_alergi=True,
+        alergen_ids=[1],
+    )
+
     assert resp.status_code == 200
+
     data = resp.json()
-    ids = {i["id_makanan"] for i in data["kandidat"]}
+    ids = {item["id_makanan"] for item in data["kandidat"]}
+
     assert 203 in ids
     assert 201 not in ids
     assert 202 not in ids
     assert 204 not in ids
+    assert 205 not in ids
 
 
 # ─── Kandidat kosong vs kesalahan layanan ─────────────────────────────────────
@@ -215,4 +245,4 @@ def test_rekomendasi_cb_score_konsistensi(client: TestClient, db_session, seed_r
     data = resp.json()
     item = data["kandidat"][0]
     expected = 100.0 * (0.5 * float(item["skor_kalori"]) + 0.5 * float(item["skor_prioritas"]))
-    assert float(item["skor_content_based"]) == round(expected, 2)
+    assert float(item["skor_content_based"]) == pytest.approx(expected)

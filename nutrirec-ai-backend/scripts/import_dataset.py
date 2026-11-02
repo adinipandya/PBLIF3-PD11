@@ -81,63 +81,67 @@ PETA_ALERGEN: dict[str, str] = {
 }
 
 
-# ─── Pembaca Excel manual (tanpa openpyxl) ───────────────────────────────────
-
-def baca_shared_strings(z: zipfile.ZipFile) -> list[str]:
-    """Baca tabel shared strings dari file xlsx."""
-    with z.open("xl/sharedStrings.xml") as f:
-        content = f.read().decode("utf-8")
-    sis = re.findall(r"<x:si>(.*?)</x:si>", content, re.DOTALL)
-    result = []
-    for si in sis:
-        texts = re.findall(r"<x:t[^/]*>([^<]*)</x:t>", si)
-        result.append("".join(texts))
-    return result
-
-
-def ambil_nilai_sel(cell_xml: str, shared_strings: list[str]) -> str | None:
-    """Ambil nilai teks dari XML satu sel."""
-    t_attr = re.search(r't="([^"]+)"', cell_xml)
-    v = re.search(r"<x:v>([^<]*)</x:v>", cell_xml)
-    if not v:
-        return None
-    val = v.group(1)
-    if t_attr and t_attr.group(1) == "s":
-        idx = int(val)
-        return shared_strings[idx] if idx < len(shared_strings) else None
-    return val
-
+# ─── Pembaca Excel menggunakan openpyxl ────────────────────
 
 def baca_dataset(xlsx_path: str) -> list[dict]:
-    """
-    Baca sheet Dataset dari file xlsx.
-    Kembalikan list of dict dengan kunci: A, B, C, D, E, F, G, H, L, M, N, O, P.
-    """
-    with zipfile.ZipFile(xlsx_path) as z:
-        shared_strings = baca_shared_strings(z)
-        # sheet1.xml = sheet pertama = Dataset
-        with z.open("xl/worksheets/sheet1.xml") as f:
-            content = f.read().decode("utf-8")
+    from openpyxl import load_workbook
+    from openpyxl.utils import get_column_letter
 
-    rows_xml = re.findall(r'<x:row r="(\d+)"[^>]*>(.*?)</x:row>', content, re.DOTALL)
-    records = []
-    for row_num_str, row_content in rows_xml:
-        row_num = int(row_num_str)
-        if row_num == 1:  # baris header, lewati
-            continue
+    workbook = load_workbook(
+        filename=xlsx_path,
+        read_only=True,
+        data_only=True,
+    )
 
-        cells_xml = re.findall(
-            r'<x:c r="([A-Z]+)\d+"[^>]*>(.*?)</x:c>', row_content, re.DOTALL
-        )
-        row_data: dict[str, str | None] = {}
-        for col, cell_content in cells_xml:
-            row_data[col] = ambil_nilai_sel(cell_content, shared_strings)
+    try:
+        if "Dataset" not in workbook.sheetnames:
+            raise ValueError(
+                "Sheet 'Dataset' tidak ditemukan dalam file Excel."
+            )
 
-        if row_data.get("A") and row_data.get("B"):
-            records.append(row_data)
+        sheet = workbook["Dataset"]
+        records = []
 
-    return records
+        for nomor_baris, values in enumerate(
+            sheet.iter_rows(
+                min_row=2,
+                max_col=16,
+                values_only=True,
+            ),
+            start=2,
+        ):
+            # Lewati baris yang seluruh selnya kosong.
+            if all(
+                value is None or str(value).strip() == ""
+                for value in values
+            ):
+                continue
 
+            record = {}
+
+            for nomor_kolom, value in enumerate(values, start=1):
+                kolom = get_column_letter(nomor_kolom)
+                record[kolom] = (
+                    None if value is None else str(value).strip()
+                )
+
+            if not record.get("A") or not record.get("B"):
+                raise ValueError(
+                    f"Baris Excel {nomor_baris}: "
+                    "NO dan NAMA MAKANAN wajib diisi."
+                )
+
+            records.append(record)
+
+        if not records:
+            raise ValueError(
+                "Tidak ada data makanan yang terbaca."
+            )
+
+        return records
+
+    finally:
+        workbook.close()
 
 # ─── Utilitas ─────────────────────────────────────────────────────────────────
 
@@ -171,34 +175,29 @@ def parse_berat_dari_porsi(deskripsi_porsi: str) -> Decimal | None:
 
 
 def parse_alergen_tercatat(teks: str | None) -> list[str]:
-    """
-    Urai teks alergen tercatat menjadi list nama_alergen yang cocok.
-    Contoh: "telur; kedelai; jagung" → ["Telur", "Kedelai", "Jagung"]
-    """
     if not teks or not teks.strip():
         return []
-    bagian = [b.strip().lower() for b in re.split(r"[;,]", teks)]
-    hasil = []
-    for b in bagian:
-        if b in PETA_ALERGEN:
-            hasil.append(PETA_ALERGEN[b])
-        else:
-            # Coba cocokkan sebagian
-            cocok = None
-            for kunci, nama in PETA_ALERGEN.items():
-                if kunci in b or b in kunci:
-                    cocok = nama
-                    break
-            if cocok:
-                hasil.append(cocok)
-            elif b:
-                print(
-                    f"  [PERINGATAN] Alergen tidak dikenali: '{b}'. Dilewati."
-                )
-    # Hilangkan duplikasi sambil mempertahankan urutan
-    seen = set()
-    return [x for x in hasil if not (x in seen or seen.add(x))]
 
+    hasil = []
+
+    for bagian in re.split(r"[;,]", teks):
+        bahan = bagian.strip().lower()
+
+        if not bahan:
+            continue
+
+        if bahan not in PETA_ALERGEN:
+            raise ValueError(
+                f"Alergen tidak dikenali: '{bahan}'. "
+                "Periksa kolom M sebelum melakukan impor."
+            )
+
+        nama = PETA_ALERGEN[bahan]
+
+        if nama not in hasil:
+            hasil.append(nama)
+
+    return hasil
 
 def tentukan_kelompok_kalori(kalori: Decimal) -> str:
     """
