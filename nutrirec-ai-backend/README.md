@@ -263,3 +263,195 @@ Response (struktural):
 - Alergi adalah filter wajib pada proses rekomendasi.
 - Makanan dengan informasi alergen belum terverifikasi wajib dikeluarkan apabila pengguna
   memiliki alergi.
+
+---
+
+## 12. Persiapan Data Survei (Sebelum Pelatihan ML)
+
+Skrip persiapan data survei berada di `scripts/prepare_survey.py`.
+
+Header makanan boleh memakai nomor pertanyaan atau hanya nama; kapitalisasi
+dan spasi dinormalisasi, sedangkan header asli dipertahankan untuk audit.
+Nama harus ada dalam pemetaan eksplisit dan tidak boleh berulang. Nomor
+pertanyaan bukan ID makanan. Rating kosong tetap dicatat.
+
+`siap_ml` selalu `false` pada tahap persiapan: tidak adanya kesalahan bukan
+persetujuan pelatihan. `alasan_belum_siap_ml` mencantumkan tahap persiapan dan
+ID database yang belum diverifikasi, serta masalah kualitas yang ditemukan.
+
+Jalankan dari direktori backend. Jika sumber berada di direktori induk seperti
+pada proyek ini, gunakan `../data/` sebagai awalan seluruh path data. Contoh:
+
+```bash
+.venv/bin/python scripts/prepare_survey.py --file '../data/NutriRec-AI (Jawaban).xlsx' --foods '../data/Dataset_makanan_revisi.xlsx' --output-dir ../data/processed --dry-run
+```
+
+Hilangkan `--dry-run` untuk ekspor. `lolos_pemeriksaan_dasar` hanya menyatakan
+pemeriksaan jawaban dasar, bukan kesiapan ML. `penanda_kiriman` dan
+`penanda_penilaian` memisahkan informasi kualitas dari `alasan_tahan`.
+Kolom `pemetaan_makanan_terkonfirmasi` menyatakan keputusan pemetaan nama,
+bukan bukti kecocokan ID dengan database terpasang. NO Excel digunakan oleh
+skrip impor sebagai ID makanan, tetapi isi database belum diverifikasi secara
+offline. ID referensi migrasi memakai auto-increment dan juga perlu diperiksa.
+
+### 12.1. File
+
+- Sumber survei: `data/NutriRec-AI (Jawaban).xlsx`
+- Sumber dataset: `data/Dataset_makanan_revisi.xlsx`
+- Hasil pemeriksaan awal: `data/survey_review/`
+- Output persiapan: `data/processed/`
+
+### 12.2. Perintah
+
+```bash
+# Dry-run: baca, validasi, tampilkan ringkasan; tidak menulis file
+python scripts/prepare_survey.py \
+  --file "../data/NutriRec-AI (Jawaban).xlsx" \
+  --foods "../data/Dataset_makanan_revisi.xlsx" \
+  --output-dir ../data/processed \
+  --dry-run
+
+# Export: menulis survey_responses.csv, survey_ratings_long.csv, survey_validation_report.json
+python scripts/prepare_survey.py \
+  --file "../data/NutriRec-AI (Jawaban).xlsx" \
+  --foods "../data/Dataset_makanan_revisi.xlsx" \
+  --output-dir ../data/processed
+```
+
+### 12.3. Arti Setiap Output
+
+- `survey_responses.csv`: satu baris per kiriman (profil asli + hasil pemetaan + source_row + penanda).
+- `survey_ratings_long.csv`: satu baris per penilaian makanan (response_id, target/prioritas/alergen ter-mapping, nama_makanan_survei, id_makanan, rating_asli, rating, status, alasan_tahan/penanda).
+- `survey_validation_report.json`: jumlah kiriman/penilaian, status penilaian, distribusi rating, penanda kualitas, grup duplikat, pemetaan belum konfirmasi.
+
+### 12.4. Penanda Kualitas & Keputusan yang Perlu Ditinjau
+
+- `konflik_tanpa_alergi_dengan_pilihan`: tanpa alergi namun mengisi pilihan alergen.
+- `konflik_alergi_tanpa_pilihan`: alergi namun tidak ada pilihan alergen. Ini menggantikan nama lama `konflik_alergi_dengan_pilihan`.
+- `rating_1_tanpa_alergi`: rating 1 diberikan pada responden tanpa alergi.
+- `kemungkinan_duplikat`: jawaban identik selain timestamp.
+- `rating_seragam`: seluruh rating seragam.
+- `pemetaan_makanan_belum_dikonfirmasi`: pemetaan makanan survei -> dataset belum konfirmasi (saat ini: Capcay).
+
+### 12.5. Perbedaan Makna "Seimbang"
+
+- Pada survei: "Seimbang (tidak ada prioritas khusus)" — pengguna memilih tanpa prioritas khusus.
+- Pada backend: prioritas "Seimbang" memakai acuan komposisi 15% protein / 55% karbohidrat / 30% lemak.
+- Perbedaan ini sengaja tidak digabung; backend tidak memperlakukan pilihan survei sebagai acuan backend.
+
+### 12.6. Pembagian Data ML
+
+- Pembagian train/validation/test kelak harus memakai `response_id` (bukan timestamp/source_row) untuk mencegah satu kiriman muncul di beberapa kelompok.
+
+## 13. Kandidat eksperimen survei
+
+Jalankan dari direktori backend:
+
+```bash
+.venv/bin/python scripts/build_survey_candidate.py \
+  --responses ../data/processed/survey_responses.csv \
+  --ratings ../data/processed/survey_ratings_long.csv \
+  --validation-report ../data/processed/survey_validation_report.json \
+  --output-dir ../data/candidate --dry-run
+```
+
+Hilangkan `--dry-run` untuk ekspor. `survey_candidate.csv` berisi penilaian
+terpilih; `survey_excluded.csv` menyimpan seluruh pengecualian beserta semua
+alasan; `survey_candidate_report.json` berisi rekonsiliasi, distribusi, dan hash
+ketiga masukan. Kiriman tertahan, penilaian tidak lolos dasar, atau pemetaan
+makanan tanpa ID/belum terkonfirmasi dikecualikan. Duplikasi dan rating seragam
+tetap dipertahankan sebagai penanda. Hasil adalah **kandidat eksperimen**, bukan
+data siap training; ID backend dan makna Seimbang masih harus ditinjau.
+Timestamp bukan fitur; `response_id` dan `source_row` hanya metadata audit.
+Pembagian kelak harus berdasarkan `response_id`, dan kelompok jawaban identik
+perlu dipertimbangkan bersama agar tidak bocor antarkelompok evaluasi.
+
+## 14. Versi survei dan identitas kiriman
+
+Letakkan ekspor baru di `../data/` tanpa menimpa sumber lama. Dari backend,
+contoh pemeriksaan snapshot penuh (selalu pilih dataset version baru):
+
+```bash
+.venv/bin/python scripts/version_survey.py \
+  --file '../data/NutriRec-AI (Jawaban).xlsx' \
+  --dataset-version survey-v002 --form-version legacy-v1 \
+  --source-namespace nutrirec-survey --mode snapshot \
+  --versions-root ../data/survey_versions --registry ../data/survey_registry.json \
+  --previous-version survey-v001 --dry-run
+```
+
+Hapus `--dry-run` untuk menerbitkan. `snapshot` adalah isi lengkap ekspor,
+bukan tambahan ke versi sebelumnya; kiriman yang tidak muncul dilaporkan,
+bukan dihapus. `incremental` hanya berisi tambahan dan membutuhkan versi
+sebelumnya; registry versi mencatat gabungan UID dan sumber sebelumnya, sedangkan
+`source.xlsx` dan sidecar menyimpan kiriman dari ekspor incremental saja.
+Gunakan arsip versi sebelumnya untuk merekonstruksi data gabungan.
+
+Sumber saat ini tidak mempunyai ID kiriman asli. Timestamp dan fingerprint
+jawaban kanonis hanya bukti pencocokan satu-ke-satu, bukan identitas orang.
+UID, response_id, source_row, dan timestamp bukan fitur ML. Timestamp sama
+dengan jawaban berubah atau kecocokan jamak ditahan dan dicetak untuk review.
+Keputusan JSON lewat `--decisions` berbentuk
+`{"2": {"submission_uid": "UID-atau-baru", "alasan": "hasil review"}}`;
+gunakan `baru` untuk kiriman baru. Keputusan dan hash-nya dicatat pada versi.
+Perubahan form_version tidak digabung dengan versi sebelumnya secara otomatis.
+
+Setiap versi disimpan di `../data/survey_versions/<dataset_version>/`; registry
+lokal di `../data/survey_registry.json`. Ekspor processed/candidate lama tidak
+diubah. Penerbitan membuat direktori lengkap dahulu, kemudian mengganti registry
+secara atomik. Jika proses terputus di antaranya, direktori versi dapat tertinggal
+tanpa entri registry; hentikan impor dan tinjau/rekonsiliasi secara manual,
+jangan menghapus atau menimpa arsip secara otomatis.
+
+## 15. Memproses snapshot yang sudah diterbitkan
+
+Dari backend, periksa terlebih dahulu tanpa menulis berkas:
+
+```bash
+.venv/bin/python scripts/process_survey_version.py \
+  --version-dir ../data/survey_versions/survey-v001 \
+  --foods ../data/Dataset_makanan_revisi.xlsx --dry-run
+```
+
+Untuk ekspor, hilangkan `--dry-run` dan tambahkan `--run-id run-001`
+(pilih ID baru untuk setiap run). Hasil tersimpan di
+`survey-v001/processing/<run-id>/`, terpisah dari arsip dan hasil lama.
+Hanya snapshot didukung; incremental ditolak sampai rekonstruksi lengkap
+tersedia. Hasil tetap kandidat eksperimen, bukan data siap training.
+
+`submission_uid` mengidentifikasi kiriman lintas versi, bukan orang. UID,
+`dataset_version`, `form_version`, `source_namespace`, `response_id`,
+`source_row`, dan timestamp adalah metadata audit, bukan fitur ML. Manifest
+pemrosesan mencatat hash masukan, aturan dan keluaran agar hasil dapat diaudit.
+
+## 16. Eksperimen ML awal offline
+
+Instal dependensi `requirements.txt`, termasuk scikit-learn 1.5.2. Dari backend:
+
+```bash
+.venv/bin/python scripts/run_ml_experiment.py \
+  --features-dir ../data/experiments/survey-v001/features-v001 \
+  --output-dir ../data/experiments/survey-v001/experiment-001 \
+  --seed 42 --dry-run
+```
+
+Hilangkan `--dry-run` untuk mengevaluasi; keluaran yang sudah ada tidak ditimpa.
+Protokolnya GroupKFold lima fold tanpa tuning atau holdout final. Dummy, Decision
+Tree, Random Forest, dan KNN menggunakan fold sama serta preprocessing yang
+di-fit hanya pada train tiap fold. Metrik mencakup accuracy, macro-F1 empat kelas,
+MAE, per kelas dan confusion matrix. Rata-rata/std fold bersifat deskriptif.
+Kelas langka mungkin tidak tersedia di beberapa fold. Probabilitas belum
+terkalibrasi; eksperimen ini bukan validasi produksi atau jaminan keamanan alergi.
+
+### Analisis kesalahan OOF
+
+```bash
+.venv/bin/python scripts/analyze_ml_errors.py \
+  --experiment-dir ../data/experiments/survey-v001/experiment-001 \
+  --features-dir ../data/experiments/survey-v001/features-v001 \
+  --output-dir ../data/experiments/survey-v001/error-analysis-002 --dry-run
+```
+
+Hilangkan `--dry-run` untuk menulis analisis ke direktori baru. Analisis tidak
+melatih ulang model; kesalahan per kelas, profil, makanan, dan fold bersifat
+deskriptif, khususnya untuk subkelompok kecil dan kelas langka.
