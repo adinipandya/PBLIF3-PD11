@@ -17,8 +17,9 @@ KONDISI_TIDAK_KOSONG_MSG = (
     "Periksa pilihan atau status verifikasi data makanan."
 )
 
-# Parameter prototipe, belum hasil eksperimen.
+# Bobot prototipe yang akan ditinjau ulang setelah validasi dengan pengguna.
 BOBOT_KALORI = 0.5
+BOBOT_PRIORITAS = 1.0 - BOBOT_KALORI
 
 
 def get_semua_makanan(db: Session) -> list[Makanan]:
@@ -33,7 +34,7 @@ def get_makanan_detail(
 
 
 def _baca_nutrisi(makanan):
-    """Kembalikan nutrisi valid; None jika tidak memenuhi syarat."""
+    """Kembalikan kalori dan proporsi energi valid; None jika tidak valid."""
     gizi = makanan.informasi_gizi
 
     if gizi is None:
@@ -68,20 +69,24 @@ def _baca_nutrisi(makanan):
     return kalori, proporsi
 
 
-def _skor_kalori(kalori: float, kategori: str) -> float:
-    if kategori == "Rendah":
-        jarak = max(0.0, kalori - 300)
-        skala = 300.0
-    elif kategori == "Sedang":
-        jarak = max(0.0, 300 - kalori, kalori - 500)
-        skala = 200.0
-    elif kategori == "Tinggi":
-        jarak = max(0.0, 500 - kalori)
-        skala = 200.0
-    else:
-        raise ValueError("Kategori kalori tidak dikenali.")
+def _skor_kalori(kalori: float, target: TargetKalori) -> float:
+    """Skor kedekatan terhadap rentang kalori yang dipilih (0–1)."""
+    if target.kalori_min is None and target.kalori_max is None:
+        raise ValueError("Rentang target kalori tidak valid.")
 
-    return max(0.0, 1.0 - jarak / skala)
+    if target.kalori_min is not None and kalori < target.kalori_min:
+        jarak = target.kalori_min - kalori
+    elif target.kalori_max is not None and kalori > target.kalori_max:
+        jarak = kalori - target.kalori_max
+    else:
+        return 1.0
+
+    rentang = (
+        target.kalori_max - target.kalori_min
+        if target.kalori_min is not None and target.kalori_max is not None
+        else target.kalori_max or target.kalori_min
+    )
+    return max(0.0, 1.0 - jarak / float(rentang))
 
 
 def _lolos_alergi(makanan, alergen_pilihan: set[int]) -> bool:
@@ -126,19 +131,46 @@ def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
                 f"ID alergen {id_alergen} tidak ditemukan."
             )
 
-    kategori = target.nama_kategori
     nama_prioritas = prioritas.nama_prioritas
 
-    if kategori not in {"Rendah", "Sedang", "Tinggi"}:
+    if target.nama_kategori not in {"Rendah", "Sedang", "Tinggi"}:
         raise ValueError("Kategori kalori tidak dikenali.")
+    if (
+        target.kalori_min is not None
+        and target.kalori_max is not None
+        and target.kalori_min >= target.kalori_max
+    ):
+        raise ValueError("Rentang target kalori tidak valid.")
+    if target.kalori_min is None and target.kalori_max is None:
+        raise ValueError("Rentang target kalori tidak valid.")
 
     if nama_prioritas not in {
         "Protein", "Karbohidrat", "Lemak", "Seimbang"
     }:
         raise ValueError("Prioritas nutrisi tidak dikenali.")
 
-    # Data normalisasi berasal dari seluruh menu bergizi valid,
-    # bukan hanya kandidat setelah filter alergi.
+    if nama_prioritas == "Seimbang":
+        try:
+            acuan_seimbang = {
+                "Protein": float(prioritas.acuan_protein),
+                "Karbohidrat": float(prioritas.acuan_karbo),
+                "Lemak": float(prioritas.acuan_lemak),
+            }
+        except (TypeError, ValueError, OverflowError):
+            raise ValueError("Acuan nutrisi seimbang tidak valid.") from None
+        if (
+            not all(math.isfinite(value) and 0 <= value <= 1 for value in acuan_seimbang.values())
+            or not math.isclose(sum(acuan_seimbang.values()), 1.0, abs_tol=0.01)
+        ):
+            raise ValueError("Acuan nutrisi seimbang tidak valid.")
+    else:
+        try:
+            ambang_prioritas = float(prioritas.min_persen_energi)
+        except (TypeError, ValueError, OverflowError):
+            raise ValueError("Ambang prioritas nutrisi tidak valid.") from None
+        if not math.isfinite(ambang_prioritas) or not 0 < ambang_prioritas <= 1:
+            raise ValueError("Ambang prioritas nutrisi tidak valid.")
+
     menu_valid = []
 
     for makanan in get_semua_makanan(db):
@@ -151,12 +183,6 @@ def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
     if not menu_valid:
         return []
 
-    batas = {}
-
-    for zat in ("Protein", "Karbohidrat", "Lemak"):
-        nilai = [proporsi[zat] for _, _, proporsi in menu_valid]
-        batas[zat] = (min(nilai), max(nilai))
-
     hasil = []
 
     for makanan, kalori, proporsi in menu_valid:
@@ -164,29 +190,23 @@ def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
             if not _lolos_alergi(makanan, pilihan):
                 continue
 
-        skor_kalori = _skor_kalori(kalori, kategori)
+        skor_kalori = _skor_kalori(kalori, target)
 
         if nama_prioritas == "Seimbang":
-            # Kandidat acuan prototipe: 15%, 55%, 30%.
-            selisih = (
-                abs(proporsi["Protein"] - 0.15)
-                + abs(proporsi["Karbohidrat"] - 0.55)
-                + abs(proporsi["Lemak"] - 0.30)
+            selisih = sum(
+                abs(proporsi[zat] - nilai)
+                for zat, nilai in acuan_seimbang.items()
             )
             skor_prioritas = max(0.0, 1.0 - selisih / 2)
         else:
-            minimum, maksimum = batas[nama_prioritas]
-
-            if maksimum == minimum:
-                skor_prioritas = 0.5
-            else:
-                skor_prioritas = (
-                    proporsi[nama_prioritas] - minimum
-                ) / (maksimum - minimum)
+            skor_prioritas = min(
+                1.0,
+                proporsi[nama_prioritas] / ambang_prioritas,
+            )
 
         skor = 100 * (
             BOBOT_KALORI * skor_kalori
-            + (1 - BOBOT_KALORI) * skor_prioritas
+            + BOBOT_PRIORITAS * skor_prioritas
         )
 
         hasil.append({

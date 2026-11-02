@@ -45,15 +45,9 @@
 
                 <!-- NAVIGATION BUTTONS -->
                 <div class="navigation-buttons">
-
-                    <a href="{{ url('/kalori') }}?kalori={{ request('kalori') }}" class="btn-back">
-                        ← Kembali
-                    </a>
-
                     <button type="submit" class="btn-next" disabled>
                         Lanjut →
                     </button>
-
                 </div>
 
             </form>

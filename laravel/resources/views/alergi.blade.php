@@ -48,13 +48,6 @@
 
             </div>
 
-            <div class="navigation-buttons">
-                <a href="{{ url('/prioritas') }}?kalori={{ request('kalori') }}"
-                   class="btn-back">
-                    ← Kembali
-                </a>
-            </div>
-
         </section>
 
     </main>

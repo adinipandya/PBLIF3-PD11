@@ -81,9 +81,12 @@ def seed_referensi(db_session: Session):
     # Prioritas nutrisi
     db_session.add_all([
         PrioritasNutrisi(id_prioritas=1, nama_prioritas="Protein", jenis="zat_gizi",
+                         zat_gizi="Protein", min_persen_energi=0.25,
                          keterangan="Prioritaskan protein"),
-        PrioritasNutrisi(id_prioritas=2, nama_prioritas="Karbohidrat", jenis="zat_gizi"),
-        PrioritasNutrisi(id_prioritas=3, nama_prioritas="Lemak", jenis="zat_gizi"),
+        PrioritasNutrisi(id_prioritas=2, nama_prioritas="Karbohidrat", jenis="zat_gizi",
+                         zat_gizi="Karbohidrat", min_persen_energi=0.50),
+        PrioritasNutrisi(id_prioritas=3, nama_prioritas="Lemak", jenis="zat_gizi",
+                         zat_gizi="Lemak", min_persen_energi=0.35),
         PrioritasNutrisi(id_prioritas=4, nama_prioritas="Seimbang", jenis="seimbang",
                          acuan_protein=0.15, acuan_karbo=0.55, acuan_lemak=0.30),
     ])

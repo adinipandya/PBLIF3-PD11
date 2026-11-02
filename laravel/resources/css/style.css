@@ -1950,6 +1950,97 @@ body, .result-page, .loading-page { background: #fff9ef; color: #15172b; font: 1
     .allergy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .calorie-card, .priority-options .calorie-card { min-height: 120px; }
     .allergy-card { min-height: 144px; }
-    .navigation-buttons { flex-wrap: wrap; }
-    .btn-back, .btn-next { flex: 1 1 140px; }
+    .navigation-buttons { flex-wrap: wrap; justify-content: center; }
+    .navigation-buttons .btn-next { flex: 0 1 190px; }
+    .btn-back { flex: 1 1 140px; }
+}
+
+/* Responsive polish for the nutrition kiosk */
+:root {
+    --background: #fffaf2;
+    --orange: #f4a900;
+    --orange-light: #fff1d0;
+    --border: #e7d8bc;
+}
+
+body {
+    background-image: radial-gradient(#e7d8bc55 .7px, transparent .7px);
+    background-size: 18px 18px;
+}
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 250, 242, .96);
+    backdrop-filter: blur(10px);
+}
+.main-content, .result-main { width: min(100%, 1200px); }
+.hero, .steps-container, .result-heading, .result-grid, .result-info { animation: enter-soft .45s ease both; }
+.step-card, .calorie-card, .allergy-card, .food-card {
+    box-shadow: 0 4px 14px rgba(43, 34, 18, .045);
+    transition: transform .18s ease, border-color .18s ease, background-color .18s ease;
+}
+.calorie-card:hover, .allergy-card:hover, .step-card:hover { transform: translateY(-2px); }
+.calorie-card:has(input:checked), .allergy-card:has(input:checked) { box-shadow: 0 6px 18px rgba(182, 119, 0, .15); }
+.btn-primary, .btn-next, .btn-back, .result-finish { min-height: 46px; }
+.btn-primary:focus-visible, .btn-next:focus-visible, .btn-back:focus-visible, .result-finish:focus-visible,
+.calorie-card:has(input:focus-visible), .allergy-card:has(input:focus-visible) {
+    outline: 3px solid #6b54c6;
+    outline-offset: 3px;
+}
+
+@keyframes enter-soft {
+    from { opacity: 0; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 761px) and (max-width: 1020px) {
+    .main-content, .result-main { padding-right: 24px; padding-left: 24px; }
+    .priority-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .priority-options .calorie-card { min-height: 170px; }
+    .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .result-grid .food-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+@media (max-width: 760px) {
+    .navbar { min-height: 60px; gap: 10px; }
+    .logo { font-size: 20px; }
+    .nav-status { max-width: 56%; padding: 7px 10px; white-space: normal; line-height: 1.25; }
+    .main-content, .result-main { padding: 26px 16px 34px; }
+    .hero { padding: 38px 18px; margin-bottom: 30px; }
+    .hero h1 { font-size: clamp(27px, 7vw, 36px); }
+    .hero p { font-size: 15px; }
+    .steps-container { padding: 22px 16px; }
+    .steps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .step-card { min-height: 118px; }
+    .calorie-options, .priority-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .calorie-card, .priority-options .calorie-card { min-height: 150px; padding: 20px 12px; }
+    .calorie-card h3, .priority-options .calorie-card h3 { font-size: clamp(16px, 4vw, 21px); }
+    .allergy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .allergy-card { min-height: 130px; padding: 18px 10px; }
+    .allergy-question-buttons { align-items: stretch; }
+    .allergy-question-buttons > * { flex: 1 1 100%; }
+    .navigation-buttons { flex-direction: row; align-items: stretch; justify-content: center; }
+    .navigation-buttons .btn-next { flex: 0 1 190px; min-width: 150px; padding: 12px 14px; font-size: 15px; }
+    .result-heading h1 { font-size: clamp(25px, 6vw, 34px); }
+    .result-grid { grid-template-columns: 1fr; gap: 16px; }
+    .result-grid .food-card, .result-grid .food-card.best-match { min-height: 0; padding: 22px 18px; }
+    .result-grid .food-card h2 { min-height: 56px; }
+    .result-action { flex-wrap: wrap; gap: 10px; }
+    .footer { padding: 14px 16px; font-size: 12px; }
+}
+
+@media (max-width: 390px) {
+    .navbar { padding: 0 12px; }
+    .nav-status { font-size: 9px; }
+    .main-content, .result-main { padding-right: 12px; padding-left: 12px; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .calorie-options, .priority-options, .allergy-grid { grid-template-columns: 1fr; }
+    .calorie-card, .priority-options .calorie-card, .allergy-card { min-height: 112px; }
+    .navigation-buttons { flex-direction: row; justify-content: center; }
+    .navigation-buttons .btn-next { width: min(100%, 190px); flex: 0 1 190px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }

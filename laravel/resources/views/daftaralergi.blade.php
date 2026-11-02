@@ -42,16 +42,9 @@
                 <div class="calorie-options allergy-grid" id="allergyOptions"></div>
 
                 <div class="navigation-buttons allergy-submit">
-
-                    <a href="{{ url('/alergi') }}?kalori={{ request('kalori') }}&prioritas={{ request('prioritas') }}"
-                       class="btn-back">
-                        ← Kembali
-                    </a>
-
                     <button type="submit" class="btn-next" disabled>
                         Lanjut →
                     </button>
-
                 </div>
 
             </form>

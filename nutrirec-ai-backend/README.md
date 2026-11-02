@@ -12,16 +12,31 @@ Aplikasi ini dibangun dengan **FastAPI**, **SQLAlchemy 2.0**, **Alembic**, dan *
 NutriRec AI menerima kebutuhan nutrisi pengguna (target kalori, prioritas nutrisi, alergi)
 melalui Kiosk/Web UI, lalu menghasilkan rekomendasi menu makanan beserta informasi nutrisi.
 
-Alur inti:
+Alur aplikasi yang berjalan saat ini:
 
 1. Pengguna menginput kebutuhan melalui Kiosk/Web UI.
-2. Sistem menyaring makanan berdasarkan alergi.
-3. Sistem menjalankan content-based recommendation pada makanan yang lolos penyaringan.
-4. Sistem memprediksi tingkat kesesuaian via model Machine Learning (proses final).
-5. Sistem menggabungkan Content-Based Score dan prediksi ML menjadi **Suitability Score**.
-6. Sistem menampilkan maksimal **Top 3** rekomendasi beserta informasi nutrisi dan skor.
+2. Sistem menyaring makanan berdasarkan alergi (menu yang status datanya belum terverifikasi tidak diloloskan untuk pengguna dengan alergi).
+3. Sistem menghitung skor kecocokan content-based dari target kalori dan prioritas komposisi energi.
+4. Sistem menampilkan maksimal **Top 3** rekomendasi beserta informasi nutrisi dan skor.
+
+Eksperimen model Machine Learning berjalan offline dan belum terintegrasi atau dinyatakan siap produksi. Skor aplikasi saat ini bukan gabungan skor content-based dan prediksi ML.
 
 ---
+
+## Menjalankan seluruh aplikasi lokal
+
+Gunakan dua terminal. Backend memerlukan database MySQL yang telah berisi tabel, data referensi, dan menu; lihat bagian **12.1. Menjalankan NutriRec secara lokal** untuk urutan setup yang aman. Setelah API hidup dan endpoint `/api/v1/reference-data` berhasil:
+
+1. Di direktori `laravel`, jalankan `composer install` dan `npm ci`.
+2. Salin `.env.example` menjadi `.env` hanya jika `.env` belum ada. Buat `APP_KEY` untuk instalasi baru dengan `php artisan key:generate`; atur `VITE_NUTRIREC_API_URL=http://127.0.0.1:8000`.
+3. Jalankan `npm run build`, lalu `php artisan serve --host=127.0.0.1 --port=8001`.
+4. Buka `http://127.0.0.1:8001/` dan jalankan alur pilih kalori, prioritas, alergi, lalu lihat hasil.
+
+Nilai `.env.example` memakai session/cache file dan queue sync, sehingga tidak perlu tabel session/cache/queue Laravel untuk demo. Jika Anda sudah memiliki `.env`, periksa nilainya sendiri; file tersebut tidak ditimpa. API harus tetap berjalan di port 8000 dan mengizinkan origin web Laravel pada port 8001. Perubahan `VITE_NUTRIREC_API_URL` memerlukan rebuild aset. Uji frontend dengan `node --test tests/integration.test.js`; uji backend dengan `.venv/bin/python -m pytest -q` dari direktori backend.
+
+## Skor rekomendasi prototipe
+
+Skor akhir adalah rata-rata berbobot 50:50 antara kecocokan kalori dan kecocokan prioritas nutrisi. Protein, karbohidrat, atau lemak dibandingkan dengan `min_persen_energi` pada data referensi; karena itu skor konsisten dan tidak berubah hanya akibat menu lain ditambahkan ke katalog. Prioritas Seimbang memakai acuan protein/karbohidrat/lemak pada tabel referensi. Nilai bobot, ambang, dan acuan masih parameter prototipe yang perlu divalidasi dengan pengguna dan ahli gizi; skor bukan probabilitas, saran medis, ataupun jaminan keamanan alergi.
 
 ## 2. Prasyarat
 
@@ -32,6 +47,8 @@ Alur inti:
 ---
 
 ## 3. Instalasi
+
+Buat virtual environment sebelum memasang dependensi. Salin `.env.example` ke `.env` hanya jika `.env` belum tersedia; isi `DATABASE_URL` dengan database pengembangan yang sudah disiapkan. Jangan menjalankan migrasi atau impor terhadap database yang belum diperiksa.
 
 ```bash
 # 1. Clone / masuk ke folder proyek
@@ -61,7 +78,7 @@ File `.env` diperlukan. Contoh konfigurasi (jangan di-commit; jangan tampilkan k
 DATABASE_URL=mysql+pymysql://nutrirec_user:<password>@<host>:3306/nutrirec_db
 APP_ENV=development
 DEBUG=true
-ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:5500
+ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:5500,http://127.0.0.1:8001,http://localhost:8001
 DATASET_VERSION=revisi-PD11-R1
 ```
 
@@ -201,20 +218,20 @@ Aturan layanan pada mode prototipe:
   pengguna memiliki alergi. Daftar relasi alergen **kosong tidak** berarti bebas alergen.
 - Kalori dan prioritas nutrisi digunakan sebagai **skor**, bukan filter wajib.
 - Rentang kalori: Rendah < 300; Sedang 300–500 (inklusif); Tinggi > 500 kkal per porsi.
-- Priority: Protein, Karbohidrat, Lemak, Seimbang (normalisasi min-max proporsi energi;
-  Seimbang memakai acuan 0.15 / 0.55 / 0.30).
+- Prioritas: Protein, Karbohidrat, Lemak, Seimbang. Tiga prioritas zat gizi memakai
+  `min_persen_energi` pada tabel referensi sebagai ambang; Seimbang memakai acuan energi
+  yang tersimpan pada tabel prioritas.
 - Energi makro = 4×protein + 4×karbohidrat + 9×lemak.
 - **CB Score (%)** = 100 × (w1 × skor_kalori + w2 × skor_prioritas), dengan bobot
-  w1 = 0.5 dan w2 = 0.5 pada mode prototipe (bobot akhir ditentukan lewat eksperimen
-  pada tahap pelatihan ML).
+  prototipe w1 = 0.5 dan w2 = 0.5; bobot masih perlu divalidasi.
 - Maksimal 3 kandidat, diurutkan skor menurun, lalu `id_makanan` naik jika seri.
 - Jika tidak ada kandidat yang lolos, respons dikembalikan dengan
   `jumlah_kandidat: 0`, `kandidat: []`, dan `pesan_kosong` diisi (bukan error 500).
 - Jika ID referensi tidak dikenal, endpoint mengembalikan **HTTP 400** dengan detail
   alasan.
 
-Catatan: pada tahap ini skor content-based **bukan** gabungan skor ML; prediksi ML
-masih akan ditambahkan pada tahap berikutnya.
+Catatan: skor content-based saat ini **bukan** gabungan skor ML; eksperimen ML offline
+belum terintegrasi atau dinyatakan siap produksi.
 
 ---
 
