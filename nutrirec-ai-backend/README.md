@@ -55,6 +55,16 @@ Skrip membutuhkan dependensi backend yang tercantum di `requirements.txt` (terma
 
 CLI memakai aturan bersama `app/core/recommendation_rules.py` dan mesin layanan `filter_dan_rekomendasikan` yang sama dengan API. API tetap memerlukan database yang telah disiapkan; Laravel hanya antarmuka yang memanggil API dan tidak menjalankan perhitungan rekomendasi lokal. CLI membentuk katalog sementara di memori dari file, tidak menulis database atau hasil pengguna kecuali `--output-json` diminta. Katalog aktual saat ini menandai semua relasi alergen sebagai belum diverifikasi, sehingga permintaan alergi secara benar dapat menghasilkan nol kandidat.
 
+## Demo interaktif offline
+
+Dari direktori `nutrirec-ai-backend`, jalankan:
+
+```bash
+.venv/bin/python scripts/demo_interaktif.py
+```
+
+CLI memakai path dataset/model relatif terhadap file skrip, menerima pilihan alergen multi-ID dari referensi CLI proyek, dan tidak menyimpan input atau hasil. Hybrid memakai model tersimpan dengan alpha 0,5 dan tetap eksploratif. Untuk Seimbang, hybrid belum didukung; pengguna ditawari Content-based atau ML eksploratif legacy secara eksplisit.
+
 ## Skor rekomendasi content-based prototipe
 
 Aturan kanonis berada di `app/core/recommendation_rules.py`; kategori kalori saat impor dan skor runtime memakai fungsi di modul yang sama. Kategori per porsi bersifat tunggal: Rendah `<300`, Sedang `300–500` inklusif, Tinggi `>500` kkal. Ini label pilihan, bukan filter kandidat.
