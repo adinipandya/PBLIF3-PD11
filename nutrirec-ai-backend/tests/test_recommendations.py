@@ -297,3 +297,19 @@ def test_rekomendasi_prioritas_tanpa_ambang_referensi_ditolak(client: TestClient
 
     assert resp.status_code == 400
     assert "Ambang prioritas" in resp.json()["detail"]
+
+def test_rekomendasi_skor_sama_diurutkan_berdasarkan_id(
+    client: TestClient, db_session, seed_referensi
+):
+    # Data gizi dibuat sama agar skor rekomendasinya sama.
+    _buat_menu(db_session, 102, "Nasi Ayam", 400, 20, 50, 10, "Sedang")
+    _buat_menu(db_session, 101, "Mie Ayam", 400, 20, 50, 10, "Sedang")
+
+    resp = _kirim_permintaan(client)
+
+    assert resp.status_code == 200
+
+    kandidat = resp.json()["kandidat"]
+    ids = [item["id_makanan"] for item in kandidat]
+
+    assert ids == [101, 102]
