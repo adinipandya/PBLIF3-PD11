@@ -38,7 +38,9 @@ def test_reference_data_prioritas_nutrisi(client: TestClient, seed_referensi):
     assert "Karbohidrat" in nama
     assert "Lemak" in nama
     assert "Seimbang" in nama
-
+    seimbang = next(p for p in prioritas if p["nama_prioritas"] == "Seimbang")
+    assert "bukan saran medis individual" in seimbang["keterangan"]
+    assert "rating survei lama" in seimbang["keterangan"]
 
 def test_reference_data_alergen(client: TestClient, seed_referensi):
     """Alergen tersedia sesuai yang di-seed."""

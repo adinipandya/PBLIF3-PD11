@@ -25,10 +25,10 @@ def test_profil_invalid_ditahan(value):
 
 
 def test_alergen_tidak_dikenal_dilaporkan():
-    r = row(**{ps.REQUIRED_COLUMNS[4]: "Telur (klaim palsu)"})
+    r = row(**{ps.REQUIRED_COLUMNS[4]: "Bahan misterius"})
     _, ratings, report = ps.siapkan_data([r], {"Bihun Goreng Sayur": 1})
     assert "alergen_tidak_dikenal" in ratings[0]["penanda_kiriman"]
-    assert report["kesalahan"][0]["token"] == "Telur (klaim palsu)"
+    assert report["kesalahan"][0]["token"] == "Bahan misterius"
     assert ps.parse_alergen("Telur, Kacang-kacangan (tauge, kacang tanah, buncis)")[0] == [1, 8]
 
 
@@ -40,19 +40,27 @@ def test_mapping_tidak_ditemukan_dan_capcay():
     assert report["jumlah_kiriman_terdampak_unik"] == 1
 
 
-def dataset(path, rows):
+def dataset(path, rows, headers=None):
     wb = Workbook(); ws = wb.active; ws.title = "Dataset"
-    ws.append(["NAMA MAKANAN", "NO"])
+    if headers is None:
+        headers = complete_dataset_headers()
+    ws.append(headers)
     for item in rows:
         ws.append(item)
     wb.save(path)
 
+def complete_dataset_headers():
+    return ["NAMA MAKANAN", "NO", "KALORI (kkal)", "KARBO (g)", "LEMAK (g)", "PROTEIN (g)", "PORSI", "KELOMPOK KALORI", "% ENERGI PROTEIN", "% ENERGI KARBO", "% ENERGI LEMAK", "PRIORITAS NUTRISI", "ALERGEN TERCATAT", "SUMBER DATA", "STATUS ALERGEN", "CATATAN VERIFIKASI"]
+
 
 def test_dataset_header_berpindah_dan_duplikat(tmp_path):
     path = tmp_path / "foods.xlsx"
-    dataset(path, [["A", 7], ["a", 7], ["B", None]])
-    mapping, errors = ps.baca_dataset(str(path))
-    assert mapping["A"] == 7
+    headers = complete_dataset_headers()
+    def full(name, food_id):
+        return [name, food_id, 300, 10, 5, 10, "1 porsi", "Sedang", "", "", "", "", "", "sumber", "Belum diverifikasi", ""]
+    dataset(path, [full("A", 7), full("a", 7), full("B", None)], headers)
+    mapping, errors = ps.baca_dataset_detail(str(path))
+    assert mapping["A"]["id_sumber"] == 7
     assert len(errors) >= 2
 
 
@@ -109,6 +117,7 @@ def test_header_bernomor_tanpa_nomor_dan_normalisasi(tmp_path):
         by_id = {ps.kunci_header_makanan(r["nama_makanan_survei"]): (r["id_makanan"], r["rating"]) for r in ratings}
         assert by_id["capcay kuah (ayam)"][0] == ""
         assert ratings[0]["nama_makanan_survei"] in rows[0]
+        assert "status_pemetaan" in ratings[0]
         hasil.append(by_id)
     assert hasil[0] == hasil[1] == hasil[2]
 
@@ -147,7 +156,7 @@ def test_dry_run_workbook_valid_tidak_mengubah_file(tmp_path):
     survey = tmp_path / "survey.xlsx"
     foods = tmp_path / "foods.xlsx"
     buat_survei_valid(survey)
-    dataset(foods, [[n, i] for i, n in enumerate(ps.MAPELANGGAN_MAKANAN.values(), 1)])
+    dataset(foods, [[n, i, 300, 10, 5, 10, "1 porsi", "Sedang", "", "", "", "", "", "sumber", "Belum diverifikasi", ""] for i, n in enumerate(ps.MAPELANGGAN_MAKANAN.values(), 1)], complete_dataset_headers())
     out = tmp_path / "output"
     out.mkdir()
     (out / "survey_responses.csv").write_bytes(b"hasil lama")

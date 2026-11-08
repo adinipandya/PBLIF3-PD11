@@ -6,9 +6,10 @@ Tabel ini memuat data statis yang dimasukkan lewat migrasi data referensi,
 bukan dari Excel. Mereka menjadi sumber acuan pilihan kiosk.
 
 target_kalori
-  Rendah  : kalori_min=NULL, kalori_max=300  (eksklusif, < 300 kkal)
-  Sedang  : kalori_min=300,  kalori_max=500  (inklusif, 300–500 kkal)
-  Tinggi  : kalori_min=500,  kalori_max=NULL (eksklusif, > 500 kkal)
+  Rendah  : < 300 kkal per porsi
+  Sedang  : 300–500 kkal per porsi (inklusif)
+  Tinggi  : > 500 kkal per porsi
+  Kategori menjadi label; skor kontinu ditentukan aturan rekomendasi.
 
 prioritas_nutrisi
   jenis = 'zat_gizi'  → Protein, Karbohidrat, Lemak
@@ -42,16 +43,16 @@ class TargetKalori(Base):
         unique=True,
         comment="'Rendah' | 'Sedang' | 'Tinggi'",
     )
-    # NULL berarti batas terbuka (tidak ada batas bawah/atas)
+    # Fields provide category data for UI; the scorer uses canonical rule formulas.
     kalori_min: Mapped[int | None] = mapped_column(
         Integer,
         nullable=True,
-        comment="Batas bawah inklusif (kkal); NULL jika terbuka",
+        comment="Batas kategori tampilan; skor ditentukan aturan bersama",
     )
     kalori_max: Mapped[int | None] = mapped_column(
         Integer,
         nullable=True,
-        comment="Batas atas eksklusif (kkal); NULL jika terbuka",
+        comment="Batas kategori tampilan; skoring kontinu memakai aturan bersama",
     )
     keterangan: Mapped[str | None] = mapped_column(
         Text,
@@ -103,23 +104,23 @@ class PrioritasNutrisi(Base):
     min_persen_energi: Mapped[float | None] = mapped_column(
         Numeric(5, 4),
         nullable=True,
-        comment="Ambang batas proporsi energi (0–1) untuk skor prioritas",
+        comment="Legacy unused reference field; nutrient scoring uses catalogue min-max",
     )
     # Kolom acuan untuk 'Seimbang'
     acuan_protein: Mapped[float | None] = mapped_column(
         Numeric(5, 4),
         nullable=True,
-        comment="Acuan proporsi protein untuk prioritas Seimbang (mis. 0.15)",
+        comment="Prototype reference proportion 0.15; not individual medical advice",
     )
     acuan_karbo: Mapped[float | None] = mapped_column(
         Numeric(5, 4),
         nullable=True,
-        comment="Acuan proporsi karbo untuk prioritas Seimbang (mis. 0.55)",
+        comment="Prototype reference proportion 0.55; not individual medical advice",
     )
     acuan_lemak: Mapped[float | None] = mapped_column(
         Numeric(5, 4),
         nullable=True,
-        comment="Acuan proporsi lemak untuk prioritas Seimbang (mis. 0.30)",
+        comment="Prototype reference proportion 0.30; not individual medical advice",
     )
     keterangan: Mapped[str | None] = mapped_column(
         Text,

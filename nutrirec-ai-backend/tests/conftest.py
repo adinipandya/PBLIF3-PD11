@@ -69,26 +69,27 @@ def client(db_session: Session) -> TestClient:
 @pytest.fixture()
 def seed_referensi(db_session: Session):
     """Isi tabel referensi dengan data minimal untuk test."""
-    # Target kalori
+    # Target values use the selected category and inclusive display bounds.
     db_session.add_all([
         TargetKalori(id_target=1, nama_kategori="Rendah", kalori_min=None, kalori_max=300,
                      keterangan="< 300 kkal"),
         TargetKalori(id_target=2, nama_kategori="Sedang", kalori_min=300, kalori_max=500,
-                     keterangan="300–500 kkal"),
+                     keterangan="300–500 kkal (inklusif)"),
         TargetKalori(id_target=3, nama_kategori="Tinggi", kalori_min=500, kalori_max=None,
                      keterangan="> 500 kkal"),
     ])
     # Prioritas nutrisi
     db_session.add_all([
         PrioritasNutrisi(id_prioritas=1, nama_prioritas="Protein", jenis="zat_gizi",
-                         zat_gizi="Protein", min_persen_energi=0.25,
-                         keterangan="Prioritaskan protein"),
+                         zat_gizi="Protein", min_persen_energi=None,
+                         keterangan="Prioritaskan proporsi energi protein"),
         PrioritasNutrisi(id_prioritas=2, nama_prioritas="Karbohidrat", jenis="zat_gizi",
-                         zat_gizi="Karbohidrat", min_persen_energi=0.50),
+                         zat_gizi="Karbohidrat", min_persen_energi=None),
         PrioritasNutrisi(id_prioritas=3, nama_prioritas="Lemak", jenis="zat_gizi",
-                         zat_gizi="Lemak", min_persen_energi=0.35),
+                         zat_gizi="Lemak", min_persen_energi=None),
         PrioritasNutrisi(id_prioritas=4, nama_prioritas="Seimbang", jenis="seimbang",
-                         acuan_protein=0.15, acuan_karbo=0.55, acuan_lemak=0.30),
+                         acuan_protein=0.15, acuan_karbo=0.55, acuan_lemak=0.30,
+                         keterangan="Acuan prototipe 15/55/30; bukan saran medis individual; rating survei lama memiliki makna berbeda"),
     ])
     # Alergen
     db_session.add_all([

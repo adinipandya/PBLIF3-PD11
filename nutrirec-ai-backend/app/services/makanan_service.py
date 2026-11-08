@@ -1,25 +1,38 @@
 """Layanan data makanan dan rekomendasi content-based."""
 
+import logging
 import math
 
 from sqlalchemy.orm import Session
 
+from app.core.recommendation_rules import (
+    CALORIE_CATEGORIES,
+    NUTRIENT_PRIORITIES,
+    calorie_category,
+    balanced_score,
+    calorie_score,
+    combined_score,
+    min_max_scores,
+)
 from app.models.makanan import Makanan
 from app.models.alergen import Alergen
 from app.models.referensi import TargetKalori, PrioritasNutrisi
 from app.repositories import makanan_repo
 
-
-VERSI_ATURAN = "PD11-R1"
+VERSI_ATURAN = "PD11-R2"
+logger = logging.getLogger(__name__)
 
 KONDISI_TIDAK_KOSONG_MSG = (
     "Belum ada makanan yang lolos penyaringan. "
     "Periksa pilihan atau status verifikasi data makanan."
 )
 
-# Bobot prototipe yang akan ditinjau ulang setelah validasi dengan pengguna.
-BOBOT_KALORI = 0.5
-BOBOT_PRIORITAS = 1.0 - BOBOT_KALORI
+ALASAN_DATA_GIZI_TIDAK_VALID = {
+    "kosong": "Data informasi gizi tidak tersedia.",
+    "non_numerik": "Nilai gizi harus numerik.",
+    "negatif_atau_tidak_finite": "Nilai gizi harus finite dan tidak negatif.",
+    "energi_tidak_valid": "Energi makro harus finite dan lebih dari nol.",
+}
 
 
 def get_semua_makanan(db: Session) -> list[Makanan]:
@@ -38,6 +51,11 @@ def _baca_nutrisi(makanan):
     gizi = makanan.informasi_gizi
 
     if gizi is None:
+        logger.warning(
+            "Makanan %s dikeluarkan: %s",
+            makanan.id_makanan,
+            ALASAN_DATA_GIZI_TIDAK_VALID["kosong"],
+        )
         return None
 
     try:
@@ -48,16 +66,31 @@ def _baca_nutrisi(makanan):
             float(gizi.lemak),
         )
     except (TypeError, ValueError, OverflowError):
+        logger.warning(
+            "Makanan %s dikeluarkan: %s",
+            makanan.id_makanan,
+            ALASAN_DATA_GIZI_TIDAK_VALID["non_numerik"],
+        )
         return None
 
     angka = (kalori, protein, karbo, lemak)
 
     if not all(math.isfinite(x) and x >= 0 for x in angka):
+        logger.warning(
+            "Makanan %s dikeluarkan: %s",
+            makanan.id_makanan,
+            ALASAN_DATA_GIZI_TIDAK_VALID["negatif_atau_tidak_finite"],
+        )
         return None
 
     energi = 4 * protein + 4 * karbo + 9 * lemak
 
-    if energi <= 0:
+    if not math.isfinite(energi) or energi <= 0:
+        logger.warning(
+            "Makanan %s dikeluarkan: %s",
+            makanan.id_makanan,
+            ALASAN_DATA_GIZI_TIDAK_VALID["energi_tidak_valid"],
+        )
         return None
 
     proporsi = {
@@ -65,28 +98,15 @@ def _baca_nutrisi(makanan):
         "Karbohidrat": 4 * karbo / energi,
         "Lemak": 9 * lemak / energi,
     }
+    if not all(math.isfinite(value) for value in proporsi.values()):
+        logger.warning(
+            "Makanan %s dikeluarkan: proporsi energi non-finite.",
+            makanan.id_makanan,
+        )
+        return None
 
     return kalori, proporsi
 
-
-def _skor_kalori(kalori: float, target: TargetKalori) -> float:
-    """Skor kedekatan terhadap rentang kalori yang dipilih (0–1)."""
-    if target.kalori_min is None and target.kalori_max is None:
-        raise ValueError("Rentang target kalori tidak valid.")
-
-    if target.kalori_min is not None and kalori < target.kalori_min:
-        jarak = target.kalori_min - kalori
-    elif target.kalori_max is not None and kalori > target.kalori_max:
-        jarak = kalori - target.kalori_max
-    else:
-        return 1.0
-
-    rentang = (
-        target.kalori_max - target.kalori_min
-        if target.kalori_min is not None and target.kalori_max is not None
-        else target.kalori_max or target.kalori_min
-    )
-    return max(0.0, 1.0 - jarak / float(rentang))
 
 
 def _lolos_alergi(makanan, alergen_pilihan: set[int]) -> bool:
@@ -95,6 +115,7 @@ def _lolos_alergi(makanan, alergen_pilihan: set[int]) -> bool:
     # Model saat ini belum mencatat verifikasi menyeluruh makanan.
     # Daftar relasi kosong tidak boleh dianggap bebas alergen.
     if not kandungan:
+        logger.info("Makanan %s dikeluarkan: relasi alergen kosong.", makanan.id_makanan)
         return False
 
     for item in kandungan:
@@ -102,12 +123,43 @@ def _lolos_alergi(makanan, alergen_pilihan: set[int]) -> bool:
             return False
 
         if item.status_verifikasi != "Terverifikasi":
+            logger.info("Makanan %s dikeluarkan: alergen %s belum diverifikasi.", makanan.id_makanan, item.id_alergen)
             return False
 
     return True
 
 
-def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
+def hitung_skor_katalog(menu_valid, target_kalori: str, nama_prioritas: str):
+    """Score valid catalogue rows using the shared PD11-R2 rule functions."""
+    proporsi_prioritas = (
+        [item[2][nama_prioritas] for item in menu_valid]
+        if nama_prioritas in NUTRIENT_PRIORITIES
+        else []
+    )
+    normalized = min_max_scores(proporsi_prioritas)
+    low, high = (min(proporsi_prioritas), max(proporsi_prioritas)) if proporsi_prioritas else (None, None)
+    by_id = {
+        item[0].id_makanan: score
+        for item, score in zip(menu_valid, normalized)
+    }
+    details = {}
+    for food, calories, proportions in menu_valid:
+        priority_score = (
+            balanced_score(proportions)
+            if nama_prioritas == "Seimbang"
+            else by_id[food.id_makanan]
+        )
+        calorie = calorie_score(calories, target_kalori)
+        details[food.id_makanan] = {
+            "proporsi_energi": proportions,
+            "skor_kalori": calorie,
+            "skor_prioritas": priority_score,
+            "skor_content_based": combined_score(calorie, priority_score),
+        }
+    return details, low, high
+
+def urutkan_katalog_kandidat(db: Session, permintaan) -> list:
+    """Return all valid, allergy-eligible catalogue rows in canonical CB order."""
     target = db.get(TargetKalori, permintaan.target_kalori_id)
     prioritas = db.get(PrioritasNutrisi, permintaan.prioritas_id)
 
@@ -117,7 +169,18 @@ def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
     if prioritas is None:
         raise ValueError("ID prioritas nutrisi tidak ditemukan.")
 
-    pilihan = set(permintaan.alergen_ids)
+    if not isinstance(permintaan.status_alergi, bool):
+        raise ValueError("Status alergi harus dipilih: memiliki atau tidak memiliki alergi.")
+
+    alergen_ids = permintaan.alergen_ids
+    if not isinstance(alergen_ids, list) or any(
+        isinstance(value, bool) or not isinstance(value, int) or value <= 0
+        for value in alergen_ids
+    ):
+        raise ValueError("Daftar alergen harus berisi ID integer positif.")
+    if len(set(alergen_ids)) != len(alergen_ids):
+        raise ValueError("Setiap alergen hanya boleh dipilih satu kali.")
+    pilihan = set(alergen_ids)
 
     if permintaan.status_alergi and not pilihan:
         raise ValueError("Pilih minimal satu alergen.")
@@ -133,88 +196,28 @@ def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
 
     nama_prioritas = prioritas.nama_prioritas
 
-    if target.nama_kategori not in {"Rendah", "Sedang", "Tinggi"}:
+    if target.nama_kategori not in CALORIE_CATEGORIES:
         raise ValueError("Kategori kalori tidak dikenali.")
-    if (
-        target.kalori_min is not None
-        and target.kalori_max is not None
-        and target.kalori_min >= target.kalori_max
-    ):
-        raise ValueError("Rentang target kalori tidak valid.")
-    if target.kalori_min is None and target.kalori_max is None:
-        raise ValueError("Rentang target kalori tidak valid.")
-
-    if nama_prioritas not in {
-        "Protein", "Karbohidrat", "Lemak", "Seimbang"
-    }:
+    if nama_prioritas not in (*NUTRIENT_PRIORITIES, "Seimbang"):
         raise ValueError("Prioritas nutrisi tidak dikenali.")
 
-    if nama_prioritas == "Seimbang":
-        try:
-            acuan_seimbang = {
-                "Protein": float(prioritas.acuan_protein),
-                "Karbohidrat": float(prioritas.acuan_karbo),
-                "Lemak": float(prioritas.acuan_lemak),
-            }
-        except (TypeError, ValueError, OverflowError):
-            raise ValueError("Acuan nutrisi seimbang tidak valid.") from None
-        if (
-            not all(math.isfinite(value) and 0 <= value <= 1 for value in acuan_seimbang.values())
-            or not math.isclose(sum(acuan_seimbang.values()), 1.0, abs_tol=0.01)
-        ):
-            raise ValueError("Acuan nutrisi seimbang tidak valid.")
-    else:
-        try:
-            ambang_prioritas = float(prioritas.min_persen_energi)
-        except (TypeError, ValueError, OverflowError):
-            raise ValueError("Ambang prioritas nutrisi tidak valid.") from None
-        if not math.isfinite(ambang_prioritas) or not 0 < ambang_prioritas <= 1:
-            raise ValueError("Ambang prioritas nutrisi tidak valid.")
-
     menu_valid = []
-
     for makanan in get_semua_makanan(db):
         nutrisi = _baca_nutrisi(makanan)
-
         if nutrisi is not None:
             kalori, proporsi = nutrisi
             menu_valid.append((makanan, kalori, proporsi))
 
-    if not menu_valid:
-        return []
+    # Score and normalize over the complete valid catalogue before allergy filtering.
+    skor_by_id, _, _ = hitung_skor_katalog(
+        menu_valid, target.nama_kategori, nama_prioritas
+    )
 
     hasil = []
-
-    for makanan, kalori, proporsi in menu_valid:
-        if permintaan.status_alergi:
-            if not _lolos_alergi(makanan, pilihan):
-                continue
-
-        skor_kalori = _skor_kalori(kalori, target)
-
-        if nama_prioritas == "Seimbang":
-            selisih = sum(
-                abs(proporsi[zat] - nilai)
-                for zat, nilai in acuan_seimbang.items()
-            )
-            skor_prioritas = max(0.0, 1.0 - selisih / 2)
-        else:
-            skor_prioritas = min(
-                1.0,
-                proporsi[nama_prioritas] / ambang_prioritas,
-            )
-
-        skor = 100 * (
-            BOBOT_KALORI * skor_kalori
-            + BOBOT_PRIORITAS * skor_prioritas
-        )
-
-        hasil.append({
-            "makanan": makanan,
-            "skor_kalori": skor_kalori,
-            "skor_prioritas": skor_prioritas,
-            "skor_content_based": skor,
-        })
+    for makanan, _, _ in menu_valid:
+        if permintaan.status_alergi and not _lolos_alergi(makanan, pilihan):
+            continue
+        hasil.append({"makanan": makanan, **skor_by_id[makanan.id_makanan]})
 
     hasil.sort(
         key=lambda item: (
@@ -223,8 +226,11 @@ def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
         )
     )
 
-    return hasil[:3]
+    return hasil
 
+def filter_dan_rekomendasikan(db: Session, permintaan) -> list:
+    """Filter/score via the shared engine, then return the application Top 3."""
+    return urutkan_katalog_kandidat(db, permintaan)[:3]
 
 def demo_terminal():
     """Demo lokal menggunakan snapshot Excel dan database sementara di memori."""
@@ -256,7 +262,7 @@ def demo_terminal():
 
     print("=== DEMO CONTENT-BASED NUTRIREC ===")
     print("Data Excel; tanpa API dan tanpa mengubah database atau file sumber.")
-    print("Hasil bukan jaminan keamanan alergi atau saran medis.")
+    print("Hasil bukan probabilitas, saran medis, atau jaminan keamanan alergi.")
     try:
         records = baca_dataset(str(path))
         engine = create_engine("sqlite:///:memory:")
@@ -298,8 +304,9 @@ def demo_terminal():
                 gizi = makanan.informasi_gizi
                 print(f"\n{i}. {makanan.nama_makanan} ({makanan.deskripsi_porsi})")
                 print(f"   Kalori: {gizi.kalori} kkal | Protein: {gizi.protein} g | Karbohidrat: {gizi.karbohidrat} g | Lemak: {gizi.lemak} g")
-                print(f"   Skor kalori: {item['skor_kalori']:.3f} | Skor prioritas: {item['skor_prioritas']:.3f} | Skor content-based: {item['skor_content_based']:.2f}")
-            print("\nSkor bukan probabilitas atau jaminan keamanan alergi. NO Excel bukan ID database.")
+                print(f"   Skor kalori: {item['skor_kalori']:.3f} | Skor prioritas: {item['skor_prioritas']:.3f} | Skor CB: {item['skor_content_based']:.2f}/100")
+            print("\nSkor adalah parameter awal prototipe, bukan probabilitas, saran medis, atau jaminan keamanan alergi.")
+            print("NO Excel bukan ID database.")
     except (OSError, ValueError, EOFError, KeyboardInterrupt) as exc:
         print(f"\nDemo berhenti: {exc}")
         return 1
