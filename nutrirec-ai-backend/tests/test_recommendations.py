@@ -346,8 +346,9 @@ def test_rekomendasi_katalog_satu_item_prioritas_netral(client: TestClient, db_s
     item = resp.json()["kandidat"][0]
     assert float(item["skor_prioritas"]) == 0.5
 
-
-def test_skor_prioritas_makanan_tunggal_tetap_netral_setelah_filter_alergi(client: TestClient, db_session, seed_referensi):
+def test_skor_prioritas_makanan_tunggal_tetap_netral_setelah_filter_alergi(
+    client: TestClient, db_session, seed_referensi
+):
     _buat_menu(db_session, 101, "Menu Telur", 400, 20, 40, 10, "Sedang", [1])
     _buat_menu(db_session, 102, "Menu Kedelai", 400, 10, 80, 5, "Sedang", [2])
 
@@ -359,7 +360,9 @@ def test_skor_prioritas_makanan_tunggal_tetap_netral_setelah_filter_alergi(clien
     assert float(items[0]["skor_prioritas"]) == 1.0
 
 
-def test_rekomendasi_prioritas_tie_break_id_naik(client: TestClient, db_session, seed_referensi):
+def test_rekomendasi_prioritas_tie_break_id_naik(
+    client: TestClient, db_session, seed_referensi
+):
     for id_makanan in (102, 101, 103, 104):
         _buat_menu(db_session, id_makanan, f"Menu {id_makanan}", 400, 20, 40, 10, "Sedang")
 
@@ -371,10 +374,27 @@ def test_rekomendasi_prioritas_tie_break_id_naik(client: TestClient, db_session,
     assert len({item["skor_content_based"] for item in items}) == 1
 
 
-def test_rekomendasi_satu_dua_dan_maksimal_tiga_kandidat(client: TestClient, db_session, seed_referensi):
+def test_rekomendasi_satu_dua_dan_maksimal_tiga_kandidat(
+    client: TestClient, db_session, seed_referensi
+):
     expected_counts = (1, 2, 3)
     for index in range(4):
         _buat_menu(db_session, index + 1, f"Menu {index}", 400, 20, 40, 10, "Sedang")
         response = _kirim_permintaan(client)
         assert response.status_code == 200
         assert response.json()["jumlah_kandidat"] == expected_counts[min(index, 2)]
+
+
+def test_rekomendasi_skor_sama_diurutkan_berdasarkan_id(
+    client: TestClient, db_session, seed_referensi
+):
+    _buat_menu(db_session, 102, "Nasi Ayam", 400, 20, 50, 10, "Sedang")
+    _buat_menu(db_session, 101, "Mie Ayam", 400, 20, 50, 10, "Sedang")
+
+    resp = _kirim_permintaan(client)
+
+    assert resp.status_code == 200
+    kandidat = resp.json()["kandidat"]
+    ids = [item["id_makanan"] for item in kandidat]
+
+    assert ids == [101, 102]

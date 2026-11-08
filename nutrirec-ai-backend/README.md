@@ -520,3 +520,33 @@ terkalibrasi; eksperimen ini bukan validasi produksi atau jaminan keamanan alerg
 Hilangkan `--dry-run` untuk menulis analisis ke direktori baru. Analisis tidak
 melatih ulang model; kesalahan per kelas, profil, makanan, dan fold bersifat
 deskriptif, khususnya untuk subkelompok kecil dan kelas langka.
+
+## Riwayat rekomendasi anonim per sesi kiosk
+
+Backend mendukung penyimpanan riwayat tanpa akun/login. Frontend kiosk membuat UUID saat sesi penggunaan dimulai, lalu mengirimkannya melalui header `X-Session-ID` pada permintaan rekomendasi.
+
+Contoh membuat ID sesi di browser:
+
+```javascript
+const sessionId = sessionStorage.getItem("nutrirec_session_id") ?? crypto.randomUUID();
+sessionStorage.setItem("nutrirec_session_id", sessionId);
+```
+
+Kirim header berikut pada `POST /api/v1/recommendations/content-based`:
+
+```http
+X-Session-ID: 11111111-1111-4111-8111-111111111111
+```
+
+Endpoint riwayat:
+
+- `GET /api/v1/recommendation-history?session_id=<UUID>&limit=10` — melihat riwayat sesi (limit 1–50).
+- `DELETE /api/v1/recommendation-history?session_id=<UUID>` — menghapus riwayat sesi saat pengguna selesai.
+
+Header sesi bersifat opsional agar klien lama tetap kompatibel. Jika header tidak dikirim, rekomendasi tetap diberikan tetapi tidak disimpan ke riwayat. ID sesi bukan identitas pengguna; siapa pun yang mengetahui UUID dapat membaca atau menghapus riwayat sesi tersebut. Untuk kiosk bersama, buat ID baru untuk setiap pengguna dan hapus riwayat setelah sesi selesai. Riwayat tidak memuat nama, email, atau data akun.
+
+Jalankan migrasi database sebelum menggunakan fitur ini:
+
+```bash
+alembic upgrade head
+```
