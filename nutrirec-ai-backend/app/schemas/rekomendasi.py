@@ -14,23 +14,29 @@ class SkorContentBasedResponse(BaseModel):
 
     skor_kalori: float = Field(
         ...,
-        description="Skor kedekatan kalori terhadap rentang target (0-1)",
+        ge=0,
+        le=1,
+        description="Skor kesesuaian kalori kategori terpilih (0-1)",
     )
     skor_prioritas: float = Field(
         ...,
-        description="Skor prioritas nutrisi hasil normalisasi min-max (0-1)",
+        ge=0,
+        le=1,
+        description="Skor prioritas min-max katalog atau acuan Seimbang (0-1)",
     )
     bobot_kalori: float = Field(
         default=0.5,
-        description="Bobot skor kalori (parameter simulasi; ditentukan lewat eksperimen)",
+        description="Bobot awal prototipe untuk skor kalori",
     )
     bobot_prioritas: float = Field(
         default=0.5,
-        description="Bobot skor prioritas (parameter simulasi; ditentukan lewat eksperimen)",
+        description="Bobot awal prototipe untuk skor prioritas nutrisi",
     )
     skor_content_based: float = Field(
         ...,
-        description="CB Score (%) = 100 * (w1 * skor_kalori + w2 * skor_prioritas)",
+        ge=0,
+        le=100,
+        description="Skor CB 0-100; parameter awal prototipe, bukan prediksi ML atau keamanan alergi.",
     )
 
     model_config = ConfigDict(from_attributes=True)
@@ -50,10 +56,14 @@ class KandidatRekomendasiResponse(BaseModel):
     protein: Decimal
     karbohidrat: Decimal
     lemak: Decimal
-    skor_kalori: float
-    skor_prioritas: float
-    skor_content_based: float
-
+    skor_kalori: float = Field(..., ge=0, le=1)
+    skor_prioritas: float = Field(..., ge=0, le=1)
+    skor_content_based: float = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Skor CB 0–100; prototipe, bukan prediksi ML atau keamanan alergi.",
+    )
 
 class HasilRekomendasiResponse(BaseModel):
     """Respons akhir proses rekomendasi konten (mode prototipe)."""
@@ -63,7 +73,7 @@ class HasilRekomendasiResponse(BaseModel):
         description="Mode rekomendasi; 'prototipe' pada tahap ini",
     )
     versi_aturan: str = Field(
-        default="PD11-R1",
+        default="PD11-R2",
         description="Versi aturan rekomendasi yang dipakai",
     )
     jumlah_kandidat: int = Field(

@@ -31,6 +31,7 @@ def _buat_menu(
     """Seeder menu makanan + informasi gizi + kandungan alergen."""
     from app.models.makanan import Makanan, InformasiGizi
     from app.models.alergen import KandunganAlergen
+    from app.core.recommendation_rules import calorie_category
 
     db.add(
         Makanan(
@@ -39,7 +40,7 @@ def _buat_menu(
             deskripsi_porsi=f"{kalori} kkal per porsi",
             berat_porsi_gram=None,
             sumber_data="https://nutrinusa.id/kalori/test",
-            kelompok_kalori=kelompok_kalori,
+            kelompok_kalori=calorie_category(kalori),
             label_prioritas=None,
             versi_dataset="revisi-PD11-R1",
         )
@@ -92,7 +93,7 @@ def test_rekomendasi_content_based_struktur(client: TestClient, db_session, seed
     assert resp.status_code == 200
     data = resp.json()
     assert data["mode"] == "prototipe"
-    assert data["versi_aturan"] == "PD11-R1"
+    assert data["versi_aturan"] == "PD11-R2"
     assert data["jumlah_kandidat"] == len(data["kandidat"])
     assert len(data["kandidat"]) <= 3
     for item in data["kandidat"]:
@@ -121,38 +122,59 @@ def test_rekomendasi_content_based_urut_skor_menurun(client: TestClient, db_sess
 
 # ─── Skor kalori dan batas ─────────────────────────────────────────────────────
 
-def test_rekomendasi_skor_kalori_batasan_300_dan_500(client: TestClient, db_session, seed_referensi):
+def test_rekomendasi_skor_kalori_batasan_299_9_300_500_500_1(client: TestClient, db_session, seed_referensi):
     _buat_menu(db_session, 101, "Mie Ayam", 300, 30, 40, 10, "Sedang")   # tepat 300 → skor 1.0
     _buat_menu(db_session, 102, "Nasi Ayam", 500, 28, 40, 16, "Sedang") # tepat 500 → skor 1.0
-    _buat_menu(db_session, 103, "Soto", 299, 30, 40, 10, "Sedang")     # Di luar rentang: skor menurun.
+    _buat_menu(db_session, 103, "Soto", 299, 30, 40, 10, "Rendah")
+    _buat_menu(db_session, 104, "Batas Atas Tinggi", 500.1, 30, 40, 10, "Tinggi")
+    _buat_menu(db_session, 105, "Batas Bawah Rendah", 299.9, 30, 40, 10, "Rendah")
 
-    resp = _kirim_permintaan(client, target_kalori_id=2)  # Sedang: 300–500
+    resp = _kirim_permintaan(client, target_kalori_id=2)  # Skor kategori Sedang: 300–500
     assert resp.status_code == 200
     data = resp.json()
     items = {i["id_makanan"]: i for i in data["kandidat"]}
-    assert 101 in items
-    assert 102 in items
-    assert 103 in items
+    assert len(items) == 3
     assert float(items[101]["skor_kalori"]) == 1.0
-    assert float(items[102]["skor_kalori"]) == 1.0
-    assert float(items[103]["skor_kalori"]) == pytest.approx(0.995)
+    from app.core.recommendation_rules import calorie_score
+
+    sed = [
+        calorie_score(value, "Sedang")
+        for value in (299, 299.9, 300, 500, 500.1)
+    ]
+    assert sed == pytest.approx([0.995, 0.9995, 1.0, 1.0, 0.9995])
+    assert calorie_score(500, "Rendah") == pytest.approx(1 - 200 / 300)
+    assert calorie_score(500, "Tinggi") == 1.0
+    assert calorie_score(299, "Sedang") == pytest.approx(0.995)
+    assert calorie_score(500.1, "Sedang") == pytest.approx(0.9995)
+    assert calorie_score(299.9, "Sedang") == pytest.approx(0.9995)
+    assert calorie_score(500, "Rendah") == pytest.approx(1 - 200 / 300)
+    assert calorie_score(500, "Tinggi") == 1.0
+
+
+def test_label_kategori_tunggal_di_titik_batas():
+    from app.core.recommendation_rules import calorie_category
+
+    assert calorie_category(299.9) == "Rendah"
+    assert calorie_category(300) == "Sedang"
+    assert calorie_category(500) == "Sedang"
+    assert calorie_category(500.1) == "Tinggi"
 
 
 def test_rekomendasi_skor_prioritas_seimbang(client: TestClient, db_session, seed_referensi):
-    # Komposisi % energi: protein 0.15, karbohidrat 0.55, lemak 0.30 → skor 1.0
-    _buat_menu(db_session, 105, "Makanan Seimbang", 400, 15, 55, 13.33, "Sedang")
+    # Komposisi energi 15/55/30: acuan prototipe, bukan saran individual.
+    _buat_menu(db_session, 105, "Makanan Seimbang", 400, 15, 55, 12, "Sedang")
 
     resp = _kirim_permintaan(client, prioritas_id=4)  # Seimbang
     assert resp.status_code == 200
     data = resp.json()
     items = {i["id_makanan"]: i for i in data["kandidat"]}
     assert 105 in items
-    assert round(float(items[105]["skor_prioritas"]), 2) == 1.0
+    assert float(items[105]["skor_prioritas"]) == pytest.approx(0.9783505154639176)
 
 
 # ─── Alergi ───────────────────────────────────────────────────────────────────
 
-def test_rekomendasi_alergi_menolak_data(
+def test_rekomendasi_alergi_tunggal_menolak_data_tidak_aman(
     client: TestClient, db_session, seed_referensi
 ):
     # Pengguna memilih alergi Telur (id=1).
@@ -209,6 +231,22 @@ def test_rekomendasi_alergi_menolak_data(
     assert 205 not in ids
 
 
+def test_rekomendasi_alergi_multi_mengeluarkan_semua_id_pilihan(client: TestClient, db_session, seed_referensi):
+    _buat_menu(db_session, 211, "Aman Bahan Lain", 350, 20, 40, 10, "Sedang", [3])
+    _buat_menu(db_session, 212, "Mengandung Telur", 350, 20, 40, 10, "Sedang", [1])
+    _buat_menu(db_session, 213, "Mengandung Kedelai", 350, 20, 40, 10, "Sedang", [2])
+
+    resp = _kirim_permintaan(client, status_alergi=True, alergen_ids=[1, 2])
+
+    assert resp.status_code == 200
+    assert [item["id_makanan"] for item in resp.json()["kandidat"]] == [211]
+
+
+def test_rekomendasi_alergi_invalid_status_dan_ids(client: TestClient, db_session, seed_referensi):
+    assert _kirim_permintaan(client, status_alergi=True, alergen_ids=[]).status_code == 422
+    assert _kirim_permintaan(client, status_alergi=False, alergen_ids=[1]).status_code == 422
+    assert _kirim_permintaan(client, status_alergi=True, alergen_ids=[1, 1]).status_code == 422
+
 # ─── Kandidat kosong vs kesalahan layanan ─────────────────────────────────────
 
 def test_rekomendasi_kandidat_kosong(client: TestClient, db_session, seed_referensi):
@@ -220,6 +258,20 @@ def test_rekomendasi_kandidat_kosong(client: TestClient, db_session, seed_refere
     assert data["jumlah_kandidat"] == 0
     assert data["kandidat"] == []
     assert data["pesan_kosong"]
+
+
+def test_db_failure_is_service_unavailable(client: TestClient, monkeypatch):
+    from app.api.v1 import rekomendasi as recommendation_api
+    from sqlalchemy.exc import OperationalError
+
+    def fail_get(*args, **kwargs):
+        raise OperationalError("SELECT", {}, RuntimeError("database down"))
+
+    monkeypatch.setattr(recommendation_api, "filter_dan_rekomendasikan", fail_get)
+    response = _kirim_permintaan(client)
+
+    assert response.status_code == 503
+    assert "sementara tidak tersedia" in response.json()["detail"]
 
 
 def test_rekomendasi_referensi_tidak_valid(client: TestClient, db_session, seed_referensi):
@@ -245,40 +297,37 @@ def test_rekomendasi_cb_score_konsistensi(client: TestClient, db_session, seed_r
 
     resp = _kirim_permintaan(client)
     assert resp.status_code == 200
-    data = resp.json()
-    item = data["kandidat"][0]
+    item = resp.json()["kandidat"][0]
     expected = 100.0 * (0.5 * float(item["skor_kalori"]) + 0.5 * float(item["skor_prioritas"]))
     assert float(item["skor_content_based"]) == pytest.approx(expected)
+    assert 0 <= float(item["skor_content_based"]) <= 100
 
-def test_rekomendasi_prioritas_menggunakan_ambang_gizi_tetap(client: TestClient, db_session, seed_referensi):
-    _buat_menu(db_session, 101, "Menu Rendah Protein", 400, 10, 80, 5, "Sedang")
+def test_rekomendasi_prioritas_normalisasi_min_max_katalog(client: TestClient, db_session, seed_referensi):
+    _buat_menu(db_session, 101, "Rendah Protein", 400, 10, 80, 5, "Sedang")
+    _buat_menu(db_session, 102, "Tinggi Protein", 400, 80, 10, 5, "Sedang")
 
     resp = _kirim_permintaan(client, prioritas_id=1)
+
     assert resp.status_code == 200
-    item = resp.json()["kandidat"][0]
-    energi = 4 * 10 + 4 * 80 + 9 * 5
-    proporsi_protein = 4 * 10 / energi
-    expected_priority = proporsi_protein / 0.25
+    items = {item["id_makanan"]: item for item in resp.json()["kandidat"]}
+    assert float(items[101]["skor_prioritas"]) == 0.0
+    assert float(items[102]["skor_prioritas"]) == 1.0
 
-    assert float(item["skor_prioritas"]) == pytest.approx(expected_priority)
-    assert float(item["skor_content_based"]) == pytest.approx(
-        100 * (0.5 * item["skor_kalori"] + 0.5 * expected_priority)
-    )
 
-def test_rekomendasi_prioritas_tidak_berubah_saat_katalog_bertambah(client: TestClient, db_session, seed_referensi):
-    _buat_menu(db_session, 101, "Menu Target", 400, 10, 80, 5, "Sedang")
-    awal = _kirim_permintaan(client, prioritas_id=1).json()["kandidat"][0]
+def test_rekomendasi_prioritas_normalisasi_memakai_katalog_sebelum_filter_alergi(client: TestClient, db_session, seed_referensi):
+    _buat_menu(db_session, 101, "Aman Protein Rendah", 400, 10, 80, 5, "Sedang", [2])
+    _buat_menu(db_session, 102, "Telur Protein Tinggi", 400, 80, 10, 5, "Sedang", [1])
 
-    _buat_menu(db_session, 102, "Menu Sangat Tinggi Protein", 400, 80, 10, 5, "Sedang")
-    sesudah = _kirim_permintaan(client, prioritas_id=1).json()["kandidat"]
-    target = next(item for item in sesudah if item["id_makanan"] == 101)
+    resp = _kirim_permintaan(client, prioritas_id=1, status_alergi=True, alergen_ids=[1])
 
-    assert float(target["skor_prioritas"]) == pytest.approx(awal["skor_prioritas"])
-    assert float(target["skor_content_based"]) == pytest.approx(awal["skor_content_based"])
+    assert resp.status_code == 200
+    items = resp.json()["kandidat"]
+    assert [item["id_makanan"] for item in items] == [101]
+    assert float(items[0]["skor_prioritas"]) == 0.0
 
 def test_rekomendasi_menolak_nutrisi_tidak_valid(client: TestClient, db_session, seed_referensi):
-    _buat_menu(db_session, 101, "Menu Kalori Nol", 400, 0, 0, 0, "Sedang")
-    _buat_menu(db_session, 102, "Menu Tanpa Data Gizi", 400, 10, 80, 5, "Sedang")
+    _buat_menu(db_session, 101, "Menu Energi Makro Nol", 400, 0, 0, 0, "Sedang")
+    _buat_menu(db_session, 102, "Menu Satu-satunya Tanpa Data Gizi", 400, 10, 80, 5, "Sedang")
     db_session.delete(db_session.get(InformasiGizi, 102))
     db_session.flush()
 
@@ -287,13 +336,45 @@ def test_rekomendasi_menolak_nutrisi_tidak_valid(client: TestClient, db_session,
     assert resp.status_code == 200
     assert resp.json()["jumlah_kandidat"] == 0
 
-def test_rekomendasi_prioritas_tanpa_ambang_referensi_ditolak(client: TestClient, db_session, seed_referensi):
-    _buat_menu(db_session, 101, "Mie Ayam", 450, 18.5, 62.4, 14.8, "Sedang")
-    prioritas = db_session.get(PrioritasNutrisi, 1)
-    prioritas.min_persen_energi = None
-    db_session.flush()
+
+def test_rekomendasi_katalog_satu_item_prioritas_netral(client: TestClient, db_session, seed_referensi):
+    _buat_menu(db_session, 101, "Satu Menu", 400, 18, 50, 10, "Sedang")
 
     resp = _kirim_permintaan(client, prioritas_id=1)
 
-    assert resp.status_code == 400
-    assert "Ambang prioritas" in resp.json()["detail"]
+    assert resp.status_code == 200
+    item = resp.json()["kandidat"][0]
+    assert float(item["skor_prioritas"]) == 0.5
+
+
+def test_skor_prioritas_makanan_tunggal_tetap_netral_setelah_filter_alergi(client: TestClient, db_session, seed_referensi):
+    _buat_menu(db_session, 101, "Menu Telur", 400, 20, 40, 10, "Sedang", [1])
+    _buat_menu(db_session, 102, "Menu Kedelai", 400, 10, 80, 5, "Sedang", [2])
+
+    response = _kirim_permintaan(client, status_alergi=True, alergen_ids=[2])
+
+    assert response.status_code == 200
+    items = response.json()["kandidat"]
+    assert [item["id_makanan"] for item in items] == [101]
+    assert float(items[0]["skor_prioritas"]) == 1.0
+
+
+def test_rekomendasi_prioritas_tie_break_id_naik(client: TestClient, db_session, seed_referensi):
+    for id_makanan in (102, 101, 103, 104):
+        _buat_menu(db_session, id_makanan, f"Menu {id_makanan}", 400, 20, 40, 10, "Sedang")
+
+    resp = _kirim_permintaan(client)
+
+    assert resp.status_code == 200
+    items = resp.json()["kandidat"]
+    assert [item["id_makanan"] for item in items] == [101, 102, 103]
+    assert len({item["skor_content_based"] for item in items}) == 1
+
+
+def test_rekomendasi_satu_dua_dan_maksimal_tiga_kandidat(client: TestClient, db_session, seed_referensi):
+    expected_counts = (1, 2, 3)
+    for index in range(4):
+        _buat_menu(db_session, index + 1, f"Menu {index}", 400, 20, 40, 10, "Sedang")
+        response = _kirim_permintaan(client)
+        assert response.status_code == 200
+        assert response.json()["jumlah_kandidat"] == expected_counts[min(index, 2)]

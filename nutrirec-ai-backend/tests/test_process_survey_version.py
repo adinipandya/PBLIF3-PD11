@@ -17,11 +17,14 @@ def project(tmp_path):
     wb = Workbook(); ws = wb.active; ws.title = "Form Responses 1"
     ws.append(ps.REQUIRED_COLUMNS + [f"{i}. {n}" for i, n in enumerate(ps.MAPELANGGAN_MAKANAN, 1)])
     for timestamp in ("satu", "dua"):
-        ws.append([timestamp, "Rendah (< 300 kkal)", "Protein tinggi", "Tidak ada alergi", ""] + ["3 = Sesuai (hampir sesuai target)"] * 20)
+        ws.append([timestamp, "Rendah (< 300 kkal)", "Protein tinggi", "Tidak ada alergi", ""] + ["3 = Sesuai (hampir sesuai target)"] * 19 + ["2 = Tidak sesuai (agak jauh dari target)"])
     wb.save(survey)
     foods = tmp_path / "foods.xlsx"
-    wb = Workbook(); ws = wb.active; ws.title = "Dataset"; ws.append(["NO", "NAMA MAKANAN"])
-    for i, name in enumerate(ps.MAPELANGGAN_MAKANAN.values(), 1): ws.append([i, name])
+    wb = Workbook(); ws = wb.active; ws.title = "Dataset"
+    headers = ["NO", "NAMA MAKANAN", "KALORI (kkal)", "KARBO (g)", "LEMAK (g)", "PROTEIN (g)", "PORSI", "KELOMPOK KALORI", "% ENERGI PROTEIN", "% ENERGI KARBO", "% ENERGI LEMAK", "PRIORITAS NUTRISI", "ALERGEN TERCATAT", "SUMBER DATA", "STATUS ALERGEN", "CATATAN VERIFIKASI"]
+    ws.append(headers)
+    for i, name in enumerate(ps.MAPELANGGAN_MAKANAN.values(), 1): ws.append([i, name, 300, 40, 10, 10, "1 porsi", "Sedang", "", "", "", "", "", "sumber", "Belum diverifikasi", ""])
+
     wb.save(foods)
     root = tmp_path / "versions"; registry = tmp_path / "registry.json"
     assert vs.main(["--file", str(survey), "--dataset-version", "v1", "--form-version", "f1", "--source-namespace", "ns", "--mode", "snapshot", "--versions-root", str(root), "--registry", str(registry)]) == 0
@@ -57,16 +60,25 @@ def test_ekspor_identitas_dan_rekonsiliasi(project):
         with path.open(encoding="utf-8-sig", newline="") as f: return list(csv.DictReader(f))
     responses = read(run / "processed/survey_responses.csv")
     ratings = read(run / "processed/survey_ratings_long.csv")
-    candidate = read(run / "candidate/survey_candidate.csv")
+    candidate = read(run / "candidate/survey_candidate_exploratory.csv")
     excluded = read(run / "candidate/survey_excluded.csv")
     ids = {r["response_id"]: r["submission_uid"] for r in responses}
     assert len(ids) == 2 and len(set(ids.values())) == 2
-    assert len(ratings) == 40 and len(candidate) == 38 and len(excluded) == 2
+    assert len(ratings) == 40 and len(candidate) == 0 and len(excluded) == 40
+    assert (run / "processed/survey_food_mapping.csv").exists()
+    assert len(read(run / "processed/survey_food_mapping.csv")) == 20
+    assert (run / "candidate/survey_candidate_report.md").exists()
+    assert (run / "candidate/survey_candidate_report.json").exists()
+    assert all(row["versi_survei"] == "f1" for row in ratings)
+    assert all("definisi_prioritas" in row and "status_pemetaan" in row for row in ratings)
+    assert all(row["status_pemetaan"].startswith("ditahan_") for row in ratings)
     assert all(r["submission_uid"] == ids[r["response_id"]] and r["dataset_version"] == "v1" for r in ratings + candidate + excluded)
     report = json.loads((run / "candidate/survey_candidate_report.json").read_text())
     assert {x["submission_uid"] for x in report["kelompok_jawaban_identik_dengan_uid"][0]} == set(ids.values())
-    # CLI kandidat lama tetap menerima kolom tambahan.
-    assert bc.main(["--responses", str(run / "processed/survey_responses.csv"), "--ratings", str(run / "processed/survey_ratings_long.csv"), "--validation-report", str(run / "processed/survey_validation_report.json"), "--output-dir", str(folder / "unused"), "--dry-run"]) == 0
+    # The candidate builder validates the new audit columns in the canonical versioned pipeline.
+    _, _, _, processed_report, candidate_rows, excluded_rows, _ = pv.proses(folder, foods, database_catalog={}, database_verified=False)
+    assert len(candidate_rows) + len(excluded_rows) == 40
+    assert processed_report["kelayakan_evaluasi_PD11_R2"] == "tidak_layak"
     before = snapshot(folder.parent.parent)
     assert pv.main(args + ["--run-id", "run1"]) != 0
     assert snapshot(folder.parent.parent) == before

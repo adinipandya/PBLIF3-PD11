@@ -22,9 +22,8 @@ def upgrade() -> None:
     conn = op.get_bind()
 
     # ── target_kalori ─────────────────────────────────────────────────────
-    # Rendah  : < 300 kkal  (kalori_min=NULL, kalori_max=300 eksklusif)
-    # Sedang  : 300–500 kkal inklusif (kalori_min=300, kalori_max=500)
-    # Tinggi  : > 500 kkal  (kalori_min=500 eksklusif, kalori_max=NULL)
+    # Rendah < 300; Sedang 300–500 inklusif; Tinggi > 500 kkal per porsi.
+    # Bounds are display/reference data; scoring uses category formulas.
     conn.execute(
         sa.text(
             """
@@ -41,8 +40,8 @@ def upgrade() -> None:
     )
 
     # ── prioritas_nutrisi ─────────────────────────────────────────────────
-    # Parameter acuan Seimbang (15/55/30) adalah nilai awal eksperimen tim;
-    # dapat diperbarui setelah evaluasi tanpa mengubah skema database.
+    # Parameter awal prototipe; 15/55/30 bukan rekomendasi medis individual.
+    # Historical survey meanings and ratings are not rewritten by this seed.
     conn.execute(
         sa.text(
             """
@@ -50,18 +49,18 @@ def upgrade() -> None:
               (nama_prioritas, jenis, zat_gizi, min_persen_energi,
                acuan_protein, acuan_karbo, acuan_lemak, keterangan)
             VALUES
-              ('Protein', 'zat_gizi', 'Protein', 0.25,
+              ('Protein', 'zat_gizi', 'Protein', NULL,
                NULL, NULL, NULL,
-               'Prioritaskan makanan dengan proporsi energi dari protein tinggi'),
-              ('Karbohidrat', 'zat_gizi', 'Karbohidrat', 0.50,
+               'Skor proporsi energi protein dinormalisasi min-max pada katalog valid'),
+              ('Karbohidrat', 'zat_gizi', 'Karbohidrat', NULL,
                NULL, NULL, NULL,
-               'Prioritaskan makanan dengan proporsi energi dari karbohidrat tinggi'),
-              ('Lemak', 'zat_gizi', 'Lemak', 0.35,
+               'Skor proporsi energi karbohidrat dinormalisasi min-max pada katalog valid'),
+              ('Lemak', 'zat_gizi', 'Lemak', NULL,
                NULL, NULL, NULL,
-               'Prioritaskan makanan dengan proporsi energi dari lemak tinggi'),
+               'Skor proporsi energi lemak dinormalisasi min-max pada katalog valid'),
               ('Seimbang', 'seimbang', NULL, NULL,
                0.15, 0.55, 0.30,
-               'Makanan dengan komposisi energi mendekati 15% protein, 55% karbo, 30% lemak')
+               'Acuan prototipe 15/55/30; bukan rekomendasi medis individual; rating survei lama bermakna berbeda')
             """
         )
     )

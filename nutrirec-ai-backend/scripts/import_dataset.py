@@ -12,6 +12,7 @@ Fitur:
   - Impor dalam satu transaksi; aman dijalankan ulang (idempotent via UPSERT)
   - Melaporkan error jelas untuk nilai wajib yang tidak tersedia
   - Tidak membuat data sintetis
+  - Tidak mengubah angka gizi sumber; label kalori turunan dihitung ulang
 
 Pemetaan kolom Excel → database:
   Kolom A (NO)          → id_makanan (dipakai sebagai ID stabil)
@@ -21,7 +22,8 @@ Pemetaan kolom Excel → database:
   Kolom E (LEMAK)       → informasi_gizi.lemak
   Kolom F (PROTEIN)     → informasi_gizi.protein
   Kolom G (PORSI)       → deskripsi_porsi
-  Kolom H (KEL.KALORI)  → kelompok_kalori (nilai formula yang tersedia)
+  Kolom H (KEL.KALORI)  → sumber pembanding; kelompok_kalori dihitung ulang
+                            dari kolom C menggunakan aturan kanonis
   Kolom L (PRIORITAS)   → label_prioritas
   Kolom M (ALERGEN)     → kandungan_alergen (daftar tercatat)
   Kolom N (SUMBER DATA) → sumber_data
@@ -55,7 +57,8 @@ if env_file.exists():
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
-from app.db.session import SessionLocal, engine
+from app.core.recommendation_rules import calorie_category
+from app.db.session import SessionLocal
 from app.models.makanan import Makanan, InformasiGizi
 from app.models.alergen import Alergen, KandunganAlergen
 from app.core.config import get_settings
@@ -153,7 +156,7 @@ def parse_decimal(nilai: str | None, nama_kolom: str, baris: int) -> Decimal:
         )
     try:
         return Decimal(str(nilai).strip())
-    except InvalidOperation:
+    except (InvalidOperation, ValueError):
         raise ValueError(
             f"Baris {baris}: kolom '{nama_kolom}' = '{nilai}' bukan angka valid."
         )
@@ -200,18 +203,8 @@ def parse_alergen_tercatat(teks: str | None) -> list[str]:
     return hasil
 
 def tentukan_kelompok_kalori(kalori: Decimal) -> str:
-    """
-    Tentukan kelompok kalori sesuai spesifikasi:
-      Rendah < 300 kkal
-      Sedang 300–500 kkal inklusif
-      Tinggi > 500 kkal
-    """
-    if kalori < 300:
-        return "Rendah"
-    elif kalori <= 500:
-        return "Sedang"
-    else:
-        return "Tinggi"
+    """Label kategori per porsi melalui sumber aturan bersama."""
+    return calorie_category(kalori)
 
 
 # ─── Impor utama ──────────────────────────────────────────────────────────────
@@ -273,9 +266,19 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
             lemak  = parse_decimal(rec.get("E"), "LEMAK",  i)
             protein = parse_decimal(rec.get("F"), "PROTEIN", i)
 
+            if not all(value.is_finite() for value in (kalori, karbo, lemak, protein)):
+                raise ValueError(f"{baris_str}: nilai nutrisi harus finite.")
             if kalori < 0 or karbo < 0 or lemak < 0 or protein < 0:
                 raise ValueError(
                     f"{baris_str}: nilai nutrisi tidak boleh negatif."
+                )
+            try:
+                energi_makro = Decimal(4) * protein + Decimal(4) * karbo + Decimal(9) * lemak
+            except ArithmeticError:
+                raise ValueError(f"{baris_str}: energi makro di luar rentang numerik.") from None
+            if not energi_makro.is_finite() or energi_makro <= 0:
+                raise ValueError(
+                    f"{baris_str}: energi makro harus finite dan lebih dari nol."
                 )
 
             # Porsi dan sumber
@@ -293,7 +296,8 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
             if kelompok_excel and kelompok_excel != kelompok_hitung:
                 print(
                     f"  [INFO] {baris_str}: kelompok Excel='{kelompok_excel}' "
-                    f"vs hitung='{kelompok_hitung}'. Pakai hasil hitung."
+                    f"vs hitung='{kelompok_hitung}'. Nilai sumber dipertahankan; "
+                    "hasil kategori tersimpan hanya pada kolom turunan."
                 )
             kelompok_kalori = kelompok_hitung
 
@@ -357,11 +361,22 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
 
     db: Session = SessionLocal()
     try:
-        # Ambil peta alergen dari DB
+        # Fail before writing if the reference data cannot represent source allergens.
         alergen_db: dict[str, Alergen] = {
             a.nama_alergen: a
             for a in db.scalars(select(Alergen)).all()
         }
+        alergen_diperlukan = {
+            nama
+            for record in data_valid
+            for nama in record["alergen_list"]
+        }
+        alergen_hilang = alergen_diperlukan - alergen_db.keys()
+        if alergen_hilang:
+            raise ValueError(
+                "Alergen belum tersedia di tabel referensi: "
+                + ", ".join(sorted(alergen_hilang))
+            )
 
         n_baru = 0
         n_update = 0
@@ -410,6 +425,14 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
                     gizi_ada.karbohidrat = d["karbohidrat"]
                     gizi_ada.lemak = d["lemak"]
                     gizi_ada.protein = d["protein"]
+                else:
+                    db.add(InformasiGizi(
+                        id_makanan=d["id_makanan"],
+                        kalori=d["kalori"],
+                        karbohidrat=d["karbohidrat"],
+                        lemak=d["lemak"],
+                        protein=d["protein"],
+                    ))
                 n_update += 1
 
             # Hapus kandungan_alergen lama untuk makanan ini, lalu isi ulang
@@ -424,11 +447,7 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
             for nama_al in d["alergen_list"]:
                 al_obj = alergen_db.get(nama_al)
                 if al_obj is None:
-                    print(
-                        f"  [PERINGATAN] Alergen '{nama_al}' tidak ditemukan "
-                        f"di database. Lewati."
-                    )
-                    continue
+                    raise ValueError(f"Alergen '{nama_al}' tidak ditemukan di database.")
                 ka = KandunganAlergen(
                     id_makanan=d["id_makanan"],
                     id_alergen=al_obj.id_alergen,
