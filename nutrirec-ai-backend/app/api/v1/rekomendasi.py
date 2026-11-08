@@ -5,7 +5,10 @@ Router endpoint rekomendasi konten (content-based) — mode prototipe.
 POST /api/v1/recommendations/content-based
 """
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -18,6 +21,7 @@ from app.services.makanan_service import (
 )
 
 router = APIRouter(prefix="/recommendations", tags=["Rekomendasi"])
+logger = logging.getLogger(__name__)
 
 
 @router.post(
@@ -25,9 +29,9 @@ router = APIRouter(prefix="/recommendations", tags=["Rekomendasi"])
     response_model=HasilRekomendasiResponse,
     summary="Rekomendasi konten (content-based) — mode prototipe",
     description=(
-        "Mengembalikan maksimal 3 kandidat rekomendasi berdasarkan content-based "
-        "scoring (skor kalori + skor prioritas). Mode ini adalah prototipe; skor "
-        "content-based bukan skor gabungan ML."
+        "Filter alergi secara ketat, lalu urutkan maksimal 3 kandidat dengan skor "
+        "kalori dan prioritas nutrisi. Skor CB adalah parameter awal prototipe, "
+        "bukan probabilitas atau prediksi ML."
     ),
 )
 def rekomendasi_content_based(
@@ -40,6 +44,13 @@ def rekomendasi_content_based(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
+        ) from e
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.exception("Recommendation database operation failed.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Layanan rekomendasi sementara tidak tersedia.",
         ) from e
 
     items = [

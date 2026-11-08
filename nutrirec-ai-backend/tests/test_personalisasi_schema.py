@@ -37,15 +37,15 @@ def test_valid_tanpa_alergi():
     assert p.alergen_ids == []
 
 
-def test_valid_deduplication_alergen():
-    """ID alergen duplikat dihapus secara otomatis."""
-    p = PermintaanPersonalisasi(
-        target_kalori_id=1,
-        prioritas_id=2,
-        status_alergi=True,
-        alergen_ids=[1, 2, 1, 3, 2],
-    )
-    assert p.alergen_ids == [1, 2, 3]
+def test_invalid_duplicate_allergen_ids():
+    """Duplicate IDs are rejected instead of silently changing the request."""
+    with pytest.raises(ValidationError, match="Setiap alergen"):
+        PermintaanPersonalisasi(
+            target_kalori_id=1,
+            prioritas_id=2,
+            status_alergi=True,
+            alergen_ids=[1, 2, 1],
+        )
 
 
 # ─── Kasus tidak valid ────────────────────────────────────────────────────────

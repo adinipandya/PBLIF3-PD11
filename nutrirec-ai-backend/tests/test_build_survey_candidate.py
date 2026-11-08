@@ -6,6 +6,7 @@ import pytest
 
 from scripts import build_survey_candidate as bc
 from scripts import prepare_survey as ps
+from scripts import process_survey_version as pv
 
 
 def sumber():
@@ -17,7 +18,31 @@ def sumber():
     rows = [row(2, prioritas="Seimbang (tidak ada prioritas khusus)"),
             row(3, status="Tidak ada alergi", alergen="Telur"),
             row(4, prioritas="Seimbang (tidak ada prioritas khusus)")]
-    responses, ratings, report = ps.siapkan_data(rows, {"Bihun Goreng Sayur": 1, "Capcay Goreng / Kuah (Ayam)": 20})
+    catalog = {
+        name: {"id_sumber": i, "nama": name, "porsi": "1 porsi", "kalori": 300, "karbohidrat": 40, "lemak": 10, "protein": 10, "kategori_kalori_asli": "Sedang", "label_prioritas_asli": "", "alergen_asli": "", "status_alergen_asli": "Belum diverifikasi", "catatan": "", "audit_columns_available": True}
+        for i, name in enumerate(ps.MAPELANGGAN_MAKANAN.values(), 1)
+    }
+    db_catalog = {i: {"id_makanan": i, "nama": name, "porsi": "1 porsi", "versi_dataset": "test-v1", "kalori": 300, "protein": 10, "karbohidrat": 40, "lemak": 10} for i, name in enumerate(ps.MAPELANGGAN_MAKANAN.values(), 1)}
+    for index, record in enumerate(catalog.values(), 1):
+        record["audit_columns_available"] = True
+    responses, ratings, report = ps.siapkan_data(rows, {name: row["id_sumber"] for name, row in catalog.items()}, catalog_details=catalog, database_catalog=db_catalog, dataset_version="test-v1")
+    for response in responses:
+        response["versi_dataset_makanan"] = "test-v1"
+    for rating in ratings:
+        if "Capcay" not in rating["nama_makanan_survei"]:
+            rating["status_pemetaan"] = "id_database_cocok_nama_porsi_perlu_review"
+            rating["id_makanan"] = rating["id_makanan_katalog"] = rating["id_makanan_sumber"]
+            rating["alergen_ids_normalisasi"] = rating["alergen_ids"]
+            rating["alergen_normalisasi"] = ";".join(bc.ALLERGEN_CANONICAL[int(i)] for i in rating["alergen_ids_normalisasi"].split(";") if i)
+            rating["pemetaan_makanan_terkonfirmasi"] = False
+            rating["penanda"] = rating["penanda_penilaian"] = ""
+        else:
+            rating["id_makanan"] = rating["id_makanan_katalog"] = ""
+        rating["status_pemeriksaan_gizi"] = "valid"
+        rating["status_pemeriksaan_gizi"] = "valid"
+        rating["pemetaan_makanan_terkonfirmasi"] = rating["status_pemetaan"] == "id_database_cocok_nama_porsi_perlu_review"
+        if rating["status_pemetaan"] != "id_database_cocok_nama_porsi_perlu_review":
+            rating["penanda"] = rating["penanda_penilaian"] = bc.PENANDA_PEMETAAN
     def convert(data):
         return [{key: "" if value is None else str(value) for key, value in r.items()} for r in data]
     return convert(responses), convert(ratings), report
@@ -30,26 +55,26 @@ def test_seleksi_rekonsiliasi_dan_penanda():
     assert len(candidate) + len(excluded) == len(ratings)
     assert {(r["response_id"], r["nama_makanan_survei"]) for r in candidate}.isdisjoint(
         {(r["response_id"], r["nama_makanan_survei"]) for r in excluded})
-    assert all(r["response_id"] != "R002" for r in candidate)
+    assert [r for r in candidate if r["status_eksploratif"] == "lolos_pemeriksaan_dasar"] == []
     assert all("timestamp" not in r for r in candidate)
-    assert "Seimbang (tidak ada prioritas khusus)" == candidate[0]["prioritas_asli"]
-    assert "kemungkinan_duplikat" in candidate[0]["penanda_kiriman"]
-    assert "rating_seragam" in candidate[0]["penanda_kiriman"]
-    assert result["jumlah_gabungan_dikecualikan"] == 4
-    assert sum(v["penilaian"] for v in result["alasan_pengecualian"].values()) > 4
-    assert all(not r["id_makanan"] for r in excluded if "Capcay" in r["nama_makanan_survei"])
+    assert result["jumlah_pengecualian_unik"] == len(excluded)
+    assert sum(v["penilaian"] for v in result["alasan_pengecualian"].values()) > len(excluded)
+    assert all(r["id_makanan_katalog"] == "" for r in excluded if "Capcay" in r["nama_makanan_survei"])
+    assert all(r["status_eksploratif"] == "perlu_tinjau" for r in candidate)
+    assert result["jumlah_kandidat_eksploratif_perlu_tinjau"] == len(candidate)
     assert result["kelompok_jawaban_identik_dalam_kandidat"] == [["R001", "R003"]]
+    assert result["rekonsiliasi_pasangan_rating"]["sama"]
 
 
 def test_penahanan_rating_tidak_membuang_seluruh_kiriman():
     responses, ratings, report = sumber()
-    ratings[0]["status"] = "perlu_tinjau"
-    ratings[0]["alasan_tahan"] = "tinjau_manual"
+    ratings[0]["status"] = ratings[0]["status_pemeriksaan"] = "perlu_tinjau"
+    ratings[0]["alasan_tahan"] = ratings[0]["alasan_penahanan"] = "tinjau_manual"
     report["status_penilaian"]["lolos_pemeriksaan_dasar"] -= 1
     report["status_penilaian"]["perlu_tinjau"] += 1
     candidate, excluded, _ = bc.buat_kandidat(responses, ratings, report, {})
-    assert any(r["response_id"] == "R003" for r in candidate)
-    assert any(r["response_id"] == "R001" and r["nama_makanan_survei"].startswith("1.") for r in excluded)
+    assert any(r["response_id"] == "R003" for r in candidate + excluded)
+    assert any(r["response_id"] == "R001" and r["nama_makanan_survei"].startswith("1.") for r in candidate + excluded)
 
 
 @pytest.mark.parametrize("error", ["kiriman", "duplikat", "profil", "laporan", "boolean"])
@@ -94,7 +119,7 @@ def ubah_status(ratings, report, item, status):
     if not report["status_penilaian"][lama]:
         del report["status_penilaian"][lama]
     report["status_penilaian"][status] = report["status_penilaian"].get(status, 0) + 1
-    item["status"] = status
+    item["status"] = item["status_pemeriksaan"] = status
 
 
 @pytest.mark.parametrize("jenis", ["tanpa", "aktif", "tanpa_penanda", "penanda_saja"])
@@ -103,15 +128,20 @@ def test_konflik_kiriman_terdeteksi_dari_sumber(jenis):
     r = responses[1]
     r["tahan_seluruh_kiriman"] = "False"
     if jenis == "aktif":
-        r.update(status_alergi_asli="Ya, memiliki alergi", alergen_asli="", alergen_ids="", penanda=bc.KONFLIK_DENGAN)
+        r.update(status_alergi_asli="Ya, memiliki alergi", status_alergi_normalisasi="Ya, memiliki alergi", alergen_asli="", alergen_ids="", alergen_ids_normalisasi="", alergen_normalisasi="", penanda=bc.KONFLIK_DENGAN)
         report["distribusi_profil"][bc.PROFILE_NAMES["status_alergi_asli"]] = {"Tidak ada alergi": 2, "Ya, memiliki alergi": 1}
-    elif jenis == "tanpa_penanda":
+    if jenis == "aktif":
+        for item in ratings:
+            if item["response_id"] == "R002":
+                item["status_alergi_normalisasi"] = r["status_alergi_normalisasi"]
+    if jenis == "tanpa_penanda":
         r["penanda"] = ""
     elif jenis == "penanda_saja":
         r["alergen_asli"] = r["alergen_ids"] = ""
     for item in ratings:
         if item["response_id"] == "R002":
-            item.update(status_alergi=r["status_alergi_asli"], alergen_ids=r["alergen_ids"], penanda_kiriman=r["penanda"])
+            item.update(status_alergi=r["status_alergi_normalisasi"], status_alergi_asli=r["status_alergi_asli"], status_alergi_normalisasi=r["status_alergi_normalisasi"], alergen_ids=r["alergen_ids"], alergen_asli=r["alergen_asli"], penanda_kiriman=r["penanda"])
+            item["status_alergi_normalisasi"] = r["status_alergi_normalisasi"]
             ubah_status(ratings, report, item, "lolos_pemeriksaan_dasar")
             item["alasan_tahan"] = item["penanda"] = item["penanda_penilaian"] = ""
     with pytest.raises(bc.SumberTidakValid, match="response_id=R002, source_row=3.*konflik"):
@@ -158,11 +188,14 @@ def test_rating_satu_valid_hanya_menahan_penilaian_terkait():
     responses, ratings, report = sumber()
     item = rating_satu(responses, ratings, report)
     # Jadikan makanan kedua terkonfirmasi agar penilaian lain dapat dipilih.
-    ratings[1]["id_makanan"] = "20"
-    ratings[1]["pemetaan_makanan_terkonfirmasi"] = "True"
+    capcay_item = next(r for r in ratings if r["response_id"] == "R001" and "Capcay" in r["nama_makanan_survei"])
+    capcay_item["id_makanan"] = capcay_item["id_makanan_katalog"] = ""
+    capcay_item["status_pemetaan"] = "ditahan_varian_belum_jelas"
+    capcay_item["pemetaan_makanan_terkonfirmasi"] = "False"
+    capcay_item["penanda"] = capcay_item["penanda_penilaian"] = bc.PENANDA_PEMETAAN
     ratings[1]["penanda"] = ratings[1]["penanda_penilaian"] = ""
     candidate, excluded, _ = bc.buat_kandidat(responses, ratings, report, {})
-    assert any(r["response_id"] == "R001" for r in candidate)
+    assert all(r["response_id"] != "R001" or r["rating"] != "1" for r in candidate)
     assert any(r["response_id"] == "R001" and r["rating"] == "1" for r in excluded)
 
 

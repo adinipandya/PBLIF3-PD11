@@ -1,9 +1,6 @@
 """
 app/schemas/personalisasi.py
-Schema Pydantic untuk permintaan personalisasi kiosk (tahap berikutnya).
-
-Divalidasi sekarang agar endpoint rekomendasi dapat dikembangkan tanpa
-mengubah kontrak API. Endpoint rekomendasi BELUM diaktifkan pada tahap ini.
+Schema Pydantic untuk permintaan personalisasi rekomendasi.
 
 Aturan validasi (sesuai spesifikasi FR-02, FR-03, FR-04):
   - target_kalori_id : tepat satu nilai ID TargetKalori
@@ -33,33 +30,30 @@ class PermintaanPersonalisasi(BaseModel):
     )
     status_alergi: bool = Field(
         ...,
-        description="True = pengguna menyatakan memiliki alergi",
+        description="True = pengguna menyatakan memiliki alergi; pilih satu atau lebih alergen.",
     )
     alergen_ids: list[Annotated[int, Field(gt=0)]] = Field(
         default_factory=list,
         description=(
-            "Daftar ID alergen yang dihindari. "
+            "Daftar ID unik alergen yang dihindari. "
             "Wajib tidak kosong jika status_alergi=True. "
-            "Wajib kosong jika status_alergi=False."
+            "Wajib kosong jika status_alergi=False. ID duplikat dihapus."
         ),
     )
 
     @model_validator(mode="after")
     def validasi_aturan_alergi(self) -> "PermintaanPersonalisasi":
         """Pastikan konsistensi antara status_alergi dan alergen_ids."""
-        # Hilangkan duplikasi ID
-        unique_ids = list(dict.fromkeys(self.alergen_ids))
-        if len(unique_ids) != len(self.alergen_ids):
-            self.alergen_ids = unique_ids
-
-        if self.status_alergi and len(self.alergen_ids) == 0:
+        if self.status_alergi and not self.alergen_ids:
             raise ValueError(
-                "Jika status_alergi=True, minimal satu alergen harus dipilih."
+                "Pilih minimal satu alergen jika Anda memiliki alergi."
             )
-        if not self.status_alergi and len(self.alergen_ids) > 0:
+        if not self.status_alergi and self.alergen_ids:
             raise ValueError(
-                "Jika status_alergi=False, daftar alergen harus kosong."
+                "Daftar alergen harus kosong jika Anda tidak memiliki alergi."
             )
+        if len(set(self.alergen_ids)) != len(self.alergen_ids):
+            raise ValueError("Setiap alergen hanya boleh dipilih satu kali.")
         return self
 
     model_config = {

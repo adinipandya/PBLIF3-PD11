@@ -38,15 +38,33 @@ def test_kelompok_transitif_deterministik():
 
 def isi_nutrisi(food):
     wb = load_workbook(food); ws = wb["Dataset"]
-    for col, label in enumerate(["KALORI (kkal)", "PROTEIN (g)", "KARBO (g)", "LEMAK (g)", "PORSI"], 3):
+    headers = ["NO", "NAMA MAKANAN", "KALORI (kkal)", "KARBO (g)", "LEMAK (g)", "PROTEIN (g)", "PORSI", "KELOMPOK KALORI", "% ENERGI PROTEIN", "% ENERGI KARBO", "% ENERGI LEMAK", "PRIORITAS NUTRISI", "ALERGEN TERCATAT", "SUMBER DATA", "STATUS ALERGEN", "CATATAN VERIFIKASI"]
+    for col, label in enumerate(headers, 1):
         ws.cell(1, col, label)
-        for i in range(2, ws.max_row + 1): ws.cell(i, col, "1 porsi" if label == "PORSI" else 10)
+    for i in range(2, ws.max_row + 1):
+        for col in (3, 4, 5, 6): ws.cell(i, col, 10)
+        ws.cell(i, 7, "1 porsi (tanpa nasi)" if i == 12 else "1 porsi")
+        ws.cell(i, 8, "Rendah")
+        ws.cell(i, 9, "")
+        ws.cell(i, 10, "")
+        ws.cell(i, 11, "")
+        ws.cell(i, 12, "Protein")
+        ws.cell(i, 13, "")
+        ws.cell(i, 14, "fixture")
+        ws.cell(i, 15, "Belum diverifikasi")
+        ws.cell(i, 16, "Fixture hanya untuk menguji validasi pipeline.")
     wb.save(food)
+
+def fixture_db_catalog(food):
+    wb = load_workbook(food, data_only=True, read_only=True)
+    rows = list(wb["Dataset"].values); wb.close()
+    return {int(row[0]): {"id_makanan": int(row[0]), "nama": row[1], "porsi": row[6], "versi_dataset": "revisi-PD11-R1", "kalori": row[2], "protein": row[3], "karbohidrat": row[4], "lemak": row[5]} for row in rows[1:]}
 
 
 def test_run_sintetis_validasi_hash_dan_dry_run(project, tmp_path):
     folder, food, registry = project
     isi_nutrisi(food)
+    pv.baca_database_catalog = lambda: fixture_db_catalog(food)
     assert pv.main(["--version-dir", str(folder), "--foods", str(food), "--run-id", "run1"]) == 0
     run = folder / "processing/run1"
     target = tmp_path / "feature-output"
@@ -62,6 +80,8 @@ def test_run_sintetis_validasi_hash_dan_dry_run(project, tmp_path):
     assert set(schema["fitur_diizinkan"]).isdisjoint(set(schema["metadata_bukan_fitur"]) | {"y"})
     assert all(r["rating_asli"] == "3 = Sesuai (hampir sesuai target)" and r["y"] == "3" for r in rows)
     assert len({r["evaluation_group_id"] for r in rows}) == 1
+    assert {r["nama_makanan_survei"] for r in rows}.isdisjoint({"20. Capcay Kuah (Ayam)"})
+    assert {r["nama_makanan_survei"] for r in rows} & {"11. Ayam Goreng (Tanpa Nasi)"}
     before = {str(p): p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
     assert ml.main(args) != 0
     assert before == {str(p): p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
@@ -73,6 +93,7 @@ def test_run_sintetis_validasi_hash_dan_dry_run(project, tmp_path):
 def test_pemetaan_kandidat_bermasalah_ditolak(project, tmp_path, change):
     folder, food, registry = project
     isi_nutrisi(food)
+    pv.baca_database_catalog = lambda: fixture_db_catalog(food)
     assert pv.main(["--version-dir", str(folder), "--foods", str(food), "--run-id", "run1"]) == 0
     run = folder / "processing/run1"
     path = run / "candidate/survey_candidate.csv"
