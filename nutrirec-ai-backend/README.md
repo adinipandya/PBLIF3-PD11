@@ -34,9 +34,41 @@ Gunakan dua terminal. Backend memerlukan database MySQL yang telah berisi tabel,
 
 Nilai `.env.example` memakai session/cache file dan queue sync, sehingga tidak perlu tabel session/cache/queue Laravel untuk demo. Jika Anda sudah memiliki `.env`, periksa nilainya sendiri; file tersebut tidak ditimpa. API harus tetap berjalan di port 8000 dan mengizinkan origin web Laravel pada port 8001. Perubahan `VITE_NUTRIREC_API_URL` memerlukan rebuild aset. Uji frontend dengan `node --test tests/integration.test.js`; uji backend dengan `.venv/bin/python -m pytest -q` dari direktori backend.
 
-## Skor rekomendasi prototipe
+## Demo CLI content-based tanpa FastAPI/Laravel
 
-Skor akhir adalah rata-rata berbobot 50:50 antara kecocokan kalori dan kecocokan prioritas nutrisi. Protein, karbohidrat, atau lemak dibandingkan dengan `min_persen_energi` pada data referensi; karena itu skor konsisten dan tidak berubah hanya akibat menu lain ditambahkan ke katalog. Prioritas Seimbang memakai acuan protein/karbohidrat/lemak pada tabel referensi. Nilai bobot, ambang, dan acuan masih parameter prototipe yang perlu divalidasi dengan pengguna dan ahli gizi; skor bukan probabilitas, saran medis, ataupun jaminan keamanan alergi.
+Dari direktori `nutrirec-ai-backend` jalankan:
+
+```bash
+.venv/bin/python scripts/demo_content_based.py \\
+  --dataset ../data/Dataset_makanan_revisi.xlsx \\
+  --target-kalori Sedang --prioritas Protein \\
+  --status-alergi tidak
+
+.venv/bin/python scripts/demo_content_based.py \\
+  --dataset ../data/Dataset_makanan_revisi.xlsx \\
+  --target-kalori Rendah --prioritas Seimbang \\
+  --status-alergi memiliki --alergen-ids 1 2 \\
+  --output-json /tmp/nutrirec-demo.json
+```
+
+Skrip membutuhkan dependensi backend yang tercantum di `requirements.txt` (termasuk `openpyxl`, SQLAlchemy, dan driver aplikasi), namun membaca file katalog lokal dan tidak menghubungi database. Excel memakai sheet `Dataset` dan kolom yang sama dengan `scripts/import_dataset.py`; CSV harus memiliki header `NO,NAMA,KALORI,KARBO,LEMAK,PROTEIN,PORSI,ALERGEN,STATUS AL.`. Pemetaan token alergen eksplisit menggunakan `PETA_ALERGEN`/`parse_alergen_tercatat` yang sama dengan proses impor; ID alergen demo ditetapkan eksplisit sesuai referensi model (1–11), bukan berdasarkan nomor baris. Jika token tidak dikenal, skrip mengembalikan error, bukan menebak.
+
+CLI memakai aturan bersama `app/core/recommendation_rules.py` dan mesin layanan `filter_dan_rekomendasikan` yang sama dengan API. API tetap memerlukan database yang telah disiapkan; Laravel hanya antarmuka yang memanggil API dan tidak menjalankan perhitungan rekomendasi lokal. CLI membentuk katalog sementara di memori dari file, tidak menulis database atau hasil pengguna kecuali `--output-json` diminta. Katalog aktual saat ini menandai semua relasi alergen sebagai belum diverifikasi, sehingga permintaan alergi secara benar dapat menghasilkan nol kandidat.
+
+## Skor rekomendasi content-based prototipe
+
+Aturan kanonis berada di `app/core/recommendation_rules.py`; kategori kalori saat impor dan skor runtime memakai fungsi di modul yang sama. Kategori per porsi bersifat tunggal: Rendah `<300`, Sedang `300–500` inklusif, Tinggi `>500` kkal. Ini label pilihan, bukan filter kandidat.
+
+Skor kalori kontinu:
+- Rendah: `max(0, 1 - max(0, C - 300) / 300)`.
+- Sedang: `max(0, 1 - max(0, 300 - C, C - 500) / 200)`.
+- Tinggi: `max(0, 1 - max(0, 500 - C) / 200)`.
+
+Energi makro `E = 4P + 4K + 9L`; proporsi `p`, `k`, `l` dihitung dari energi tersebut tanpa memaksa kalori sumber menyamai energi makro. Untuk Protein/Karbohidrat/Lemak, skor nutrisi adalah normalisasi min-max proporsi energi pada seluruh katalog dengan gizi valid, sebelum filter alergi; jika maksimum sama dengan minimum, skor netral `0.5`. Untuk Seimbang: `max(0, 1 - (|p-.15| + |k-.55| + |l-.30|)/2)`. Rasio 15/55/30 adalah parameter awal prototipe, bukan saran medis individual.
+
+Skor CB `= 100 × (0.5 × skor kalori + 0.5 × skor prioritas)` dalam rentang 0–100. Bobot 50:50 adalah parameter awal prototipe. Urutkan skor asli menurun lalu ID makanan menaik; pembulatan hanya untuk tampilan. Tampilkan hingga tiga kandidat tanpa ambang minimum. Skor bukan prediksi ML, probabilitas, atau jaminan keamanan alergi.
+
+Rating survei lama tentang “Seimbang” merekam makna responden (tidak ada prioritas khusus), bukan kedekatan dengan rasio 15/55/30. Data dan rating historis tidak ditransformasikan agar cocok dengan definisi baru; label tersebut memiliki perbedaan semantik dan tidak boleh dipakai sebagai label langsung untuk melatih skor seimbang tanpa pelabelan ulang yang sah.
 
 ## 2. Prasyarat
 
@@ -104,7 +136,10 @@ Migrasi yang tersedia:
 
 1. `0001` — Migrasi awal: membuat tabel `target_kalori`, `prioritas_nutrisi`, `alergen`,
    `makanan`, `informasi_gizi`, `kandungan_alergen`.
-2. `0002` — Migrasi data referensi: mengisi tabel `target_kalori`, `prioritas_nutrisi`, dan `alergen`.
+2. `0002` — Migrasi data referensi target kalori, prioritas nutrisi, dan alergen.
+3. `0003` — Menghapus ambang prioritas legacy yang tidak dipakai dan menyelaraskan
+   keterangan dengan normalisasi min-max. Migrasi ini mengubah tabel referensi saja;
+   tidak mengubah rating survei atau data makanan.
 
 ---
 
@@ -189,7 +224,7 @@ Response:
 ```json
 {
   "mode": "prototipe",
-  "versi_aturan": "PD11-R1",
+  "versi_aturan": "PD11-R2",
   "jumlah_kandidat": 1,
   "kandidat": [
     {
@@ -201,32 +236,41 @@ Response:
       "protein": "8.00",
       "karbohidrat": "55.00",
       "lemak": "7.00",
-      "skor_kalori": 0.75,
-      "skor_prioritas": 0.5,
-      "skor_content_based": 62.5
+      "skor_kalori": 1.0,
+      "skor_prioritas": 0.0,
+      "skor_content_based": 50.0
     }
   ],
   "pesan_kosong": null
 }
 ```
 
+Response contoh di atas adalah ilustrasi format dan bukan hasil pengujian dataset terkini.
+
 Aturan layanan pada mode prototipe:
 
-- Alergi adalah **filter wajib** (`status_alergi: true` → makanan berpotensi alergi
-  diproses).
-- Makanan dengan informasi alergen **belum terverifikasi** dikeluarkan apabila
-  pengguna memiliki alergi. Daftar relasi alergen **kosong tidak** berarti bebas alergen.
+- Alergi adalah **filter wajib**. Jika `status_alergi: true`, wajib memilih satu atau
+  lebih alergen; makanan yang mengandung salah satu ID tersebut, memiliki relasi kosong,
+  atau memiliki status verifikasi yang belum terverifikasi dikeluarkan. Jika false,
+  `alergen_ids` harus kosong.
 - Kalori dan prioritas nutrisi digunakan sebagai **skor**, bukan filter wajib.
 - Rentang kalori: Rendah < 300; Sedang 300–500 (inklusif); Tinggi > 500 kkal per porsi.
-- Prioritas: Protein, Karbohidrat, Lemak, Seimbang. Tiga prioritas zat gizi memakai
-  `min_persen_energi` pada tabel referensi sebagai ambang; Seimbang memakai acuan energi
-  yang tersimpan pada tabel prioritas.
-- Energi makro = 4×protein + 4×karbohidrat + 9×lemak.
-- **CB Score (%)** = 100 × (w1 × skor_kalori + w2 × skor_prioritas), dengan bobot
-  prototipe w1 = 0.5 dan w2 = 0.5; bobot masih perlu divalidasi.
-- Maksimal 3 kandidat, diurutkan skor menurun, lalu `id_makanan` naik jika seri.
+- Prioritas nutrisi dipilih tepat satu dan hanya menjadi skor, bukan filter.
+  Protein/Karbohidrat/Lemak memakai normalisasi min-max proporsi energi seluruh katalog
+  bergizi valid, sebelum filter alergi; rentang konstan memberi skor netral 0.5.
+  Seimbang memakai acuan 15/55/30 parameter prototipe, bukan saran medis individual.
+- Energi makro = 4×protein + 4×karbohidrat + 9×lemak; nilai kalori sumber tetap utuh.
+- **Skor CB** = 100 × (0.5 × skor_kalori + 0.5 × skor_prioritas), rentang 0–100;
+  bobot 50:50 adalah parameter awal. Bukan prediksi ML, probabilitas, atau keamanan alergi.
+- Maksimal 3 kandidat, diurutkan skor asli menurun, lalu `id_makanan` naik jika seri;
+  pembulatan hanya untuk presentasi. Tidak ada ambang skor minimum.
+- Data gizi kosong/non-numerik, non-finite, negatif, atau berenergi makro tidak positif
+  tidak diberi skor; service mencatat alasan dan melewatinya. Angka kalori sumber tidak
+  dipaksa sama dengan energi makro. Data tanpa alergi terverifikasi tidak diloloskan
+  ketika filter alergi aktif.
 - Jika tidak ada kandidat yang lolos, respons dikembalikan dengan
-  `jumlah_kandidat: 0`, `kandidat: []`, dan `pesan_kosong` diisi (bukan error 500).
+  `jumlah_kandidat: 0`, `kandidat: []`, dan `pesan_kosong` diisi. Kegagalan database
+  menghasilkan HTTP 503, bukan disamakan dengan katalog kosong.
 - Jika ID referensi tidak dikenal, endpoint mengembalikan **HTTP 400** dengan detail
   alasan.
 
@@ -440,6 +484,10 @@ tersedia. Hasil tetap kandidat eksperimen, bukan data siap training.
 `dataset_version`, `form_version`, `source_namespace`, `response_id`,
 `source_row`, dan timestamp adalah metadata audit, bukan fitur ML. Manifest
 pemrosesan mencatat hash masukan, aturan dan keluaran agar hasil dapat diaudit.
+
+### Pemeriksaan fungsional hybrid eksploratif
+
+Matriks aktual 36 input (3 target × 4 prioritas × 3 kondisi alergi), model tersimpan Random Forest, alpha 0,5 dan katalog revisi-PD11-R1 disimpan di `data/experiments/survey-v001/hybrid-scenario-matrix-005/`. Hasilnya: 9 kombinasi tanpa alergi berhasil sebagai CB/ML/hybrid untuk prioritas Protein/Karbohidrat/Lemak; 24 kondisi alergi kosong sesuai filter wajib; 3 prioritas Seimbang legacy menampilkan ML eksploratif saja karena definisinya bukan rasio CB 15/55/30; 0 gagal. Hasil uji fungsional bukan bukti peningkatan kualitas, bukan model produksi, dan status alergen tidak diubah.
 
 ## 16. Eksperimen ML awal offline
 
