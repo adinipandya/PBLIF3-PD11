@@ -18,16 +18,24 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     conn = op.get_bind()
     conn.execute(sa.text(
-        "UPDATE prioritas_nutrisi "
-        "SET min_persen_energi = NULL, "
-        "keterangan = 'Skor proporsi energi dinormalisasi min-max pada seluruh katalog bergizi valid' "
-        "WHERE nama_prioritas IN ('Protein', 'Karbohidrat', 'Lemak')"
-    ))
+    """
+    UPDATE prioritas_nutrisi
+    SET min_persen_energi = NULL,
+        keterangan = CASE nama_prioritas
+            WHEN 'Protein' THEN 'Mendukung kebutuhan protein'
+            WHEN 'Karbohidrat' THEN 'Sumber tenaga harian'
+            WHEN 'Lemak' THEN 'Pilihan prioritas lemak'
+        END
+    WHERE nama_prioritas IN ('Protein', 'Karbohidrat', 'Lemak')
+    """
+))
     conn.execute(sa.text(
-        "UPDATE prioritas_nutrisi "
-        "SET keterangan = 'Acuan prototipe 15/55/30; bukan saran medis individual; rating survei lama memiliki makna berbeda' "
-        "WHERE nama_prioritas = 'Seimbang'"
-    ))
+    """
+    UPDATE prioritas_nutrisi
+    SET keterangan = 'Keseimbangan zat gizi'
+    WHERE nama_prioritas = 'Seimbang'
+    """
+))
 
 
 def downgrade() -> None:

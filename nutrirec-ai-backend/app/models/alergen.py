@@ -106,6 +106,21 @@ class KandunganAlergen(Base):
         nullable=True,
         comment="Catatan tambahan tentang verifikasi dari dataset",
     )
+    sumber_bukti: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Sumber bukti verifikasi yang ditinjau",
+    )
+    waktu_verifikasi: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        comment="Waktu verifikasi yang dilaporkan",
+    )
+    id_pengelola: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        comment="Identitas pengelola yang melakukan verifikasi",
+    )
     dibuat_pada: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
@@ -133,4 +148,3 @@ class KandunganAlergen(Base):
             f" alergen={self.id_alergen}"
             f" status='{self.status_verifikasi}'>"
         )
-

@@ -27,8 +27,11 @@ Pemetaan kolom Excel → database:
   Kolom L (PRIORITAS)   → label_prioritas
   Kolom M (ALERGEN)     → kandungan_alergen (daftar tercatat)
   Kolom N (SUMBER DATA) → sumber_data
-  Kolom O (STATUS AL.)  → status_verifikasi di kandungan_alergen
-  Kolom P (CATATAN)     → catatan_verifikasi di kandungan_alergen
+  Kolom P (CATATAN)     → catatan awal pada relasi alergen yang baru dibuat
+
+Kolom O (STATUS ALERGEN) tidak digunakan untuk mengubah status relasi.
+Status terverifikasi hanya dapat disinkronkan melalui
+scripts/sync_allergen_verification.py dengan bukti per pasangan ID.
 
 BERAT PORSI:
   Tidak ada kolom berat terpisah di Excel. Berat diambil dari deskripsi
@@ -54,7 +57,7 @@ if env_file.exists():
     from dotenv import load_dotenv
     load_dotenv(env_file)
 
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.recommendation_rules import calorie_category
@@ -207,6 +210,32 @@ def tentukan_kelompok_kalori(kalori: Decimal) -> str:
     return calorie_category(kalori)
 
 
+def tambahkan_relasi_alergen_baru(
+    db: Session,
+    id_makanan: int,
+    alergen_list: list[str],
+    alergen_db: dict[str, Alergen],
+    catatan_verifikasi: str | None,
+) -> int:
+    """Insert only new pairs; never replace existing verification data."""
+    ditambahkan = 0
+    for nama_alergen in alergen_list:
+        alergen = alergen_db[nama_alergen]
+        if db.get(KandunganAlergen, (id_makanan, alergen.id_alergen)) is not None:
+            continue
+        db.add(
+            KandunganAlergen(
+                id_makanan=id_makanan,
+                id_alergen=alergen.id_alergen,
+                status_verifikasi="Belum diverifikasi",
+                bahan_penyebab=nama_alergen.lower(),
+                catatan_verifikasi=catatan_verifikasi,
+            )
+        )
+        ditambahkan += 1
+    return ditambahkan
+
+
 # ─── Impor utama ──────────────────────────────────────────────────────────────
 
 def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
@@ -308,10 +337,6 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
             alergen_teks = rec.get("M", "")
             alergen_list = parse_alergen_tercatat(alergen_teks)
 
-            # Status verifikasi (kolom O)
-            status_ver = rec.get("O", "Belum diverifikasi") or "Belum diverifikasi"
-            status_ver = status_ver.strip()
-
             # Catatan verifikasi (kolom P)
             catatan_ver = rec.get("P", "").strip() if rec.get("P") else None
 
@@ -331,7 +356,6 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
                 "kelompok_kalori": kelompok_kalori,
                 "label_prioritas": label_prioritas,
                 "alergen_list": alergen_list,
-                "status_verifikasi": status_ver,
                 "catatan_verifikasi": catatan_ver,
                 "versi_dataset": settings.DATASET_VERSION,
             })
@@ -380,6 +404,7 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
 
         n_baru = 0
         n_update = 0
+        n_relasi_baru = 0
 
         for d in data_valid:
             # Cek apakah sudah ada
@@ -435,30 +460,19 @@ def jalankan_impor(xlsx_path: str, dry_run: bool = False) -> None:
                     ))
                 n_update += 1
 
-            # Hapus kandungan_alergen lama untuk makanan ini, lalu isi ulang
-            db.execute(
-                text(
-                    "DELETE FROM kandungan_alergen WHERE id_makanan = :id"
-                ),
-                {"id": d["id_makanan"]},
+            n_relasi_baru += tambahkan_relasi_alergen_baru(
+                db,
+                d["id_makanan"],
+                d["alergen_list"],
+                alergen_db,
+                d["catatan_verifikasi"],
             )
-            db.flush()
-
-            for nama_al in d["alergen_list"]:
-                al_obj = alergen_db.get(nama_al)
-                if al_obj is None:
-                    raise ValueError(f"Alergen '{nama_al}' tidak ditemukan di database.")
-                ka = KandunganAlergen(
-                    id_makanan=d["id_makanan"],
-                    id_alergen=al_obj.id_alergen,
-                    status_verifikasi=d["status_verifikasi"],
-                    bahan_penyebab=nama_al.lower(),
-                    catatan_verifikasi=d["catatan_verifikasi"],
-                )
-                db.add(ka)
 
         db.commit()
-        print(f"\nImpor selesai: {n_baru} baris baru, {n_update} baris diperbarui.")
+        print(
+            f"\nImpor selesai: {n_baru} makanan baru, {n_update} makanan "
+            f"diperbarui, {n_relasi_baru} relasi alergen baru ditambahkan."
+        )
 
     except Exception as e:
         db.rollback()
@@ -498,4 +512,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     jalankan_impor(args.file, dry_run=args.dry_run)
-

@@ -19,9 +19,16 @@ def get_all_makanan(db: Session) -> list[Makanan]:
         select(Makanan)
         .options(
             joinedload(Makanan.informasi_gizi),
-            joinedload(Makanan.kandungan_alergen).joinedload(
-                KandunganAlergen.alergen
-            ),
+            joinedload(Makanan.kandungan_alergen)
+            .load_only(
+                KandunganAlergen.id_makanan,
+                KandunganAlergen.id_alergen,
+                KandunganAlergen.status_verifikasi,
+                KandunganAlergen.bahan_penyebab,
+                KandunganAlergen.catatan_verifikasi,
+                KandunganAlergen.dibuat_pada,
+            )
+            .joinedload(KandunganAlergen.alergen),
         )
         .order_by(Makanan.id_makanan)
     )
@@ -35,10 +42,16 @@ def get_makanan_by_id(db: Session, id_makanan: int) -> Makanan | None:
         .where(Makanan.id_makanan == id_makanan)
         .options(
             joinedload(Makanan.informasi_gizi),
-            joinedload(Makanan.kandungan_alergen).joinedload(
-                KandunganAlergen.alergen
-            ),
+            joinedload(Makanan.kandungan_alergen)
+            .load_only(
+                KandunganAlergen.id_makanan,
+                KandunganAlergen.id_alergen,
+                KandunganAlergen.status_verifikasi,
+                KandunganAlergen.bahan_penyebab,
+                KandunganAlergen.catatan_verifikasi,
+                KandunganAlergen.dibuat_pada,
+            )
+            .joinedload(KandunganAlergen.alergen),
         )
     )
     return db.scalars(stmt).first()
-

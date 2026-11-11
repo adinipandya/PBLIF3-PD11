@@ -1,66 +1,35 @@
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prioritas Nutrisi - NutriRec AI</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-
-    @vite(['resources/css/style.css', 'resources/js/app.js'])
-</head>
-<body>
-
-    <!-- NAVBAR -->
-    <header class="navbar">
-        <a href="{{ url('/') }}" class="logo">
-            NutriRec <span>AI.</span>
-        </a>
-
-        <div class="nav-status">
-            <span class="status-dot"></span>
-            Sistem Siap Digunakan
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-
-        <section class="hero">
-            <span class="screen-step">LANGKAH 2 DARI 3 • PRIORITAS NUTRISI</span>
-            <h1>Nutrisi apa yang jadi prioritas Anda?</h1>
-        </section>
+@extends('layouts.app')
+@section('title', 'Prioritas Nutrisi - NutriRec AI')
+@section('content')
+<main class="screen-content screen-priority">
+    <section class="content">
+        <header class="question-header">
+            <span class="eyebrow">LANGKAH 2 DARI 3 • PRIORITAS NUTRISI</span>
+            <h1 class="heading">Nutrisi apa yang jadi prioritas Anda?</h1>
+        </header>
 
         <!-- PRIORITY SELECTION -->
-        <section class="steps-container">
+        <section class="choices nutrition choices-nutrition">
 
             <form action="{{ url('/alergi') }}" method="GET" id="priorityForm">
 
-                <input type="hidden" name="kalori" value="{{ request('kalori') }}">
+                <input type="hidden" name="kalori" id="selected-calorie" value="{{ request('kalori') }}">
+                <input type="hidden" name="prioritas" id="selected-priority" value="{{ request('prioritas') }}">
 
-                <div class="calorie-options priority-options" id="priorityOptions"></div>
-
-                <!-- NAVIGATION BUTTONS -->
-                <div class="navigation-buttons">
-                    <button type="submit" class="btn-next" disabled>
-                        Lanjut →
-                    </button>
-                </div>
+                <div class="calorie-options priority-options choices nutrition" id="priorityOptions"></div>
 
             </form>
 
+</section>
+
         </section>
+    </section>
+</main>
+@endsection
 
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="footer">© 2026 NutriRec AI Kiosk. All rights reserved.</footer>
-
-    <!-- VALIDATION -->
-
-
-</body>
-</html>
+@section('actions')
+<button type="submit" form="priorityForm" class="primary screen-action" disabled>
+    Lanjut <span aria-hidden="true">→</span>
+</button>
+@endsection

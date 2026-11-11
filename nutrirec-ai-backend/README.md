@@ -150,6 +150,29 @@ python scripts/import_dataset.py --file Dataset_makanan_revisi.xlsx
 python scripts/import_dataset.py --file Dataset_makanan_revisi.xlsx --dry-run
 ```
 
+Impor katalog tidak menggunakan kolom `STATUS ALERGEN` lama untuk menaikkan
+status verifikasi. Relasi yang sudah ada tidak dihapus atau ditimpa; relasi baru
+dimulai sebagai `Belum diverifikasi`. Untuk sinkronisasi bukti verifikasi,
+gunakan perintah khusus berikut (dry-run adalah mode default dan tidak menulis
+database):
+
+```bash
+python scripts/sync_allergen_verification.py --file ../data/Dataset_makanan_revisi.xlsx --dry-run
+python scripts/sync_allergen_verification.py --file ../data/Dataset_makanan_revisi.xlsx --apply
+```
+
+Workbook mempertahankan sheet yang ada dan menggunakan sheet `Verifikasi
+Alergen` dengan kolom `ID Makanan`, `Nama Makanan`, `ID Alergen`, `Nama
+Alergen`, `Bahan Penyebab`, `Status Verifikasi`, `Sumber Referensi`, dan
+`Catatan Verifikasi`. `WAKTU VERIFIKASI` dan `ID PENGELOLA` dapat ditambahkan
+sebagai kolom audit opsional. Sinkronisasi memvalidasi pasangan ID dan nama
+terhadap database serta pasangan di sheet `Dataset`. Hanya status
+`Terverifikasi` dengan bahan, sumber referensi, dan catatan yang lengkap yang
+dapat direncanakan untuk sinkronisasi; baris pending diabaikan. Kolom audit
+database bersifat nullable dan harus tersedia sebelum perubahan diterapkan.
+Pasangan tidak pernah dihapus. Tinjau dry-run dan dapatkan persetujuan sebelum
+menjalankan `--apply`; perintah apply bukan bagian dari setup biasa.
+
 Aturan impor:
 
 - Membaca sheet `Dataset` dari file Excel (openpyxl, `data_only=True`).
