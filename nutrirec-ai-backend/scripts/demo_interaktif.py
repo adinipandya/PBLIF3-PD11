@@ -88,11 +88,6 @@ def _run_once() -> None:
     allergen_ids = _choose_allergens() if has_allergy == "Ya" else []
     mode = _choose("Mode rekomendasi", ("Content-based", "Hybrid eksploratif"))
 
-    if mode == "Hybrid eksploratif" and priority == "Seimbang":
-        print("Hybrid belum mendukung Seimbang: label survei legacy berarti tanpa prioritas khusus, "
-              "bukan definisi CB 15/55/30.")
-        mode = _choose("Pilih Content-based atau ML eksploratif legacy", ("Content-based", "ML eksploratif legacy"))
-
     allergy = "memiliki" if has_allergy == "Ya" else "tidak"
     if mode == "Content-based":
         result = run_content_based(DATASET, target, priority, allergy, allergen_ids)

@@ -15,6 +15,7 @@ from scripts.demo_ml_exploratory import (
     input_features,
 )
 from scripts.prepare_ml_features import FEATURES
+from app.core.recommendation_rules import NUTRIENT_PRIORITIES
 
 ALPHA = 0.5
 MODEL_NAME = "Random Forest"
@@ -29,6 +30,21 @@ EXPERIMENTAL_WARNING = (
 
 class HybridModelUnavailableError(RuntimeError):
     """The saved exploratory pipeline or its metadata cannot be used."""
+
+
+def _hybrid_content_score(row: dict, priority: str) -> float:
+    """Return the hybrid CB component on 0–100, respecting survey semantics."""
+    if priority == "Seimbang":
+        # In the survey/model, Seimbang means no macro is prioritized.
+        # Hybrid therefore uses calorie fit only; legacy CB scoring is untouched.
+        score = float(row["skor_kalori"]) * 100.0
+    elif priority in NUTRIENT_PRIORITIES:
+        score = float(row["skor_content_based"])
+    else:
+        raise ValueError("Prioritas nutrisi tidak dikenali.")
+    if not np.isfinite(score) or not 0.0 <= score <= 100.0:
+        raise ValueError("Skor content-based hybrid harus berada pada rentang 0–100.")
+    return score
 
 
 @lru_cache(maxsize=1)
@@ -49,13 +65,9 @@ def rekomendasi_hybrid(db: Session, permintaan) -> dict:
     if not kandidat_cb:
         return {"versi_model": EXPERIMENT_ID, "jumlah_kandidat": 0, "kandidat": [], "pesan_kosong": "Tidak ada kandidat yang lolos filter alergi dan validasi gizi."}
 
-    # The trained survey uses legacy Seimbang to mean no special preference.
-    # The CB service's Seimbang is a 15/55/30 target, so blending them is invalid.
     prioritas = db.get(PrioritasNutrisi, permintaan.prioritas_id)
     if prioritas is None:
         raise ValueError("ID prioritas nutrisi tidak ditemukan.")
-    if prioritas.nama_prioritas == "Seimbang":
-        raise NotImplementedError("Hybrid belum mendukung prioritas Seimbang karena makna label survei berbeda dari skor Seimbang content-based.")
 
     config, model = _load_saved_model()
     target = db.get(TargetKalori, permintaan.target_kalori_id)
@@ -88,7 +100,8 @@ def rekomendasi_hybrid(db: Session, permintaan) -> dict:
             raise ValueError("Prediksi model tidak sesuai dengan kelas rating 1–4.")
         expected_rating = float(sum(label * class_probs[label - 1] for label in LABELS))
         score_ml = 100.0 * (expected_rating - 1.0) / 3.0
-        score_hybrid = ALPHA * row["skor_content_based"] + (1.0 - ALPHA) * score_ml
+        score_cb = _hybrid_content_score(row, prioritas.nama_prioritas)
+        score_hybrid = ALPHA * score_cb + (1.0 - ALPHA) * score_ml
         ranked.append((score_hybrid, row))
     ranked.sort(key=lambda pair: (-pair[0], pair[1]["makanan"].id_makanan))
 

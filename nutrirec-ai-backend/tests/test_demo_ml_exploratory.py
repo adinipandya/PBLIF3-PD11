@@ -58,7 +58,7 @@ def test_cb_public_contract_remains_top3_and_all_candidate_helper_returns_full_r
     assert all(set(row) == {"makanan", "proporsi_energi", "skor_kalori", "skor_prioritas", "skor_content_based"} for row in all_rows)
     assert [r["makanan"].id_makanan for r in top3] == [r["makanan"].id_makanan for r in all_rows[:3]]
 
-def test_hybrid_alpha_extremes_filter_same_pool_and_seimbang_guard(monkeypatch):
+def test_hybrid_alpha_extremes_filter_same_pool_and_support_seimbang(monkeypatch):
     verified_records = [
         {
             "id": index,
@@ -97,16 +97,22 @@ def test_hybrid_alpha_extremes_filter_same_pool_and_seimbang_guard(monkeypatch):
         assert excluded_ids
         assert all(item["id_makanan"] not in excluded_ids for item in result["rekomendasi_demo"])
     balanced = demo.infer_hybrid(EXPERIMENT, FOODS, "Random Forest", "Sedang", "Seimbang", "tidak", [], 0.5)
-    assert balanced["dukungan_cb_seimbang"] is False
-    assert balanced["top3_cb"] == []
-    assert all(item["S_CB"] is None and item["S_hybrid"] is None for item in balanced["rekomendasi_demo"])
+    assert balanced["mode"] == "hybrid_eksploratif"
+    assert balanced["dukungan_cb_seimbang"] is True
+    assert balanced["catatan_cb"] == "Seimbang survei legacy = tanpa prioritas khusus; skor CB hybrid hanya memakai kecocokan kalori."
+    assert 0 < len(balanced["top3_cb"]) <= 3
+    assert all(0 <= item["S_CB"] <= 100 and 0 <= item["S_hybrid"] <= 100 for item in balanced["rekomendasi_demo"])
+    assert all(balanced["top3_cb"][i]["S_CB"] >= balanced["top3_cb"][i + 1]["S_CB"] for i in range(len(balanced["top3_cb"]) - 1))
+    assert all(item["S_CB"] == pytest.approx(100 * item["skor_kalori"]) for item in balanced["top3_hybrid_all"])
+    assert all(item["S_hybrid"] == pytest.approx(0.5 * item["S_CB"] + 0.5 * item["S_ML"]) for item in balanced["top3_hybrid_all"])
     unsupported_allergy = demo.infer_hybrid(EXPERIMENT, FOODS, "Random Forest", "Sedang", "Seimbang", "memiliki", [1], 0.5)
     assert unsupported_allergy["status"] in {"ok", "kosong"}
     assert 0 <= unsupported_allergy["jumlah_kandidat_setelah_filter_alergi"] < 20
     assert len(unsupported_allergy["rekomendasi_demo"]) <= 3
     if unsupported_allergy["status"] == "ok":
-        assert unsupported_allergy["dukungan_cb_seimbang"] is False
-    assert all(item["S_CB"] is None and item["S_hybrid"] is None for item in unsupported_allergy["rekomendasi_demo"])
+        assert unsupported_allergy["dukungan_cb_seimbang"] is True
+        assert all(item["id_makanan"] not in {1, 2, 3, 8, 9, 17} for item in unsupported_allergy["rekomendasi_demo"])
+        assert all(0 <= item["S_CB"] <= 100 and 0 <= item["S_hybrid"] <= 100 for item in unsupported_allergy["rekomendasi_demo"])
 
 def test_input_and_schema_validation():
     with pytest.raises(ValueError, match="Pilih minimal"):

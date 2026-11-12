@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { makePayload, requestApi } from '../resources/js/app.js';
+import { choiceDescription, makePayload, requestApi } from '../resources/js/app.js';
 
 const state = { target: { id: 12 }, prioritas: { id: 34 }, status_alergi: false, alergen: [{ id: 56 }] };
 
@@ -9,6 +9,24 @@ test('payload memakai ID referensi dan mengosongkan alergen saat tidak alergi', 
     assert.deepEqual(makePayload({ ...state, status_alergi: true }).alergen_ids, [56]);
     assert.throws(() => makePayload({ ...state, status_alergi: true, alergen: [] }));
     assert.throws(() => makePayload({ ...state, target: { id: 0 } }));
+});
+
+test('target kalori Sedang ditampilkan ringkas tanpa keterangan inklusif', () => {
+    assert.equal(
+        choiceDescription('target_kalori', { nama_kategori: 'Sedang', keterangan: '300–500 kkal (inklusif)' }, 'nama_kategori'),
+        '300–500 kkal',
+    );
+});
+
+test('kartu prioritas tidak menampilkan paragraf deskripsi', () => {
+    assert.equal(
+        choiceDescription('prioritas_nutrisi', { nama_prioritas: 'Seimbang', keterangan: 'rasio makro lama' }, 'nama_prioritas'),
+        '',
+    );
+    assert.equal(
+        choiceDescription('prioritas_nutrisi', { nama_prioritas: 'Protein', keterangan: 'prioritas protein' }, 'nama_prioritas'),
+        '',
+    );
 });
 
 test('respons kosong dan kesalahan domain maupun internal ditangani', async () => {

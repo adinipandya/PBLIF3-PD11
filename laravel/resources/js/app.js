@@ -39,6 +39,13 @@ export async function requestApi(path, options = {}, fetcher = fetch) {
 function readState() { try { return JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch { return {}; } }
 function saveState(state) { sessionStorage.setItem(KEY, JSON.stringify(state)); }
 function element(tag, text, className) { const el = document.createElement(tag); if (text !== undefined) el.textContent = text; if (className) el.className = className; return el; }
+export function choiceDescription(apiField, item, labelField) {
+    if (apiField === 'target_kalori' && item[labelField] === 'Sedang') {
+        return '300–500 kkal';
+    }
+    if (apiField === 'prioritas_nutrisi') return '';
+    return item.keterangan;
+}
 const choiceIcons = { rendah: '♨', sedang: 'ϟ', tinggi: '✦', protein: '✦', karbohidrat: '♧', lemak: '◉', seimbang: '⚖', telur: '◉', ikan: '♒', ayam: '✦', beras: '♧', 'daging sapi': '◈', 'kacang-kacangan': '❋', 'udang/seafood': '♒', gandum: '♧', kedelai: '❋', jagung: '♧', kelapa: '◉' };
 const allergyIconPaths = {
     'daging sapi': 'M5 8c-2-2 1-5 4-4l2 2 3-1 4 3-1 4-3 2-5-1-4-3Z',
@@ -124,7 +131,7 @@ if (apiField === 'alergen' && allergyIconPaths[itemKey]) {
                 const title = element('strong', item[labelField]);
                 label.append(input, iconDisc, title);
 
-const description = item.keterangan;
+const description = choiceDescription(apiField, item, labelField);
 if (description) {
     label.append(
 

@@ -73,7 +73,7 @@ Dari direktori `nutrirec-ai-backend`, jalankan:
 .venv/bin/python scripts/demo_interaktif.py
 ```
 
-CLI memakai path dataset/model relatif terhadap file skrip, menerima pilihan alergen multi-ID dari referensi CLI proyek, dan tidak menyimpan input atau hasil. Hybrid memakai model tersimpan dengan alpha 0,5 dan tetap eksploratif. Untuk Seimbang, hybrid belum didukung; pengguna ditawari Content-based atau ML eksploratif legacy secara eksplisit.
+CLI memakai path dataset/model relatif terhadap file skrip, menerima pilihan alergen multi-ID dari referensi CLI proyek, dan tidak menyimpan input atau hasil. Hybrid memakai model tersimpan dengan alpha 0,5 dan tetap eksploratif. Pada mode hybrid, Seimbang mengikuti arti survei legacy (tanpa prioritas makro); komponen content-based hanya memakai kecocokan kalori, sedangkan kategori model tetap dikirim sebagai `Seimbang (tidak ada prioritas khusus)`. Endpoint Content-based lama tetap memakai rumus acuannya sendiri.
 
 ## Skor rekomendasi content-based prototipe
 
@@ -85,6 +85,8 @@ Skor kalori kontinu:
 - Tinggi: `max(0, 1 - max(0, 500 - C) / 200)`.
 
 Energi makro `E = 4P + 4K + 9L`; proporsi `p`, `k`, `l` dihitung dari energi tersebut tanpa memaksa kalori sumber menyamai energi makro. Untuk Protein/Karbohidrat/Lemak, skor nutrisi adalah normalisasi min-max proporsi energi pada seluruh katalog dengan gizi valid, sebelum filter alergi; jika maksimum sama dengan minimum, skor netral `0.5`. Untuk Seimbang: `max(0, 1 - (|p-.15| + |k-.55| + |l-.30|)/2)`. Rasio 15/55/30 adalah parameter awal prototipe, bukan saran medis individual.
+
+Rumus Seimbang 15/55/30 di atas tetap berlaku pada endpoint content-based lama. Pada endpoint Hybrid, label survei Seimbang berarti tidak memprioritaskan makro tertentu; skor content-based hybrid menjadi `100 × skor_kalori` tanpa komponen rasio makro, kemudian digabung dengan skor ML sesuai alpha. Kategori input model dipetakan ke label training `Seimbang (tidak ada prioritas khusus)`.
 
 Skor CB `= 100 × (0.5 × skor kalori + 0.5 × skor prioritas)` dalam rentang 0–100. Bobot 50:50 adalah parameter awal prototipe. Urutkan skor asli menurun lalu ID makanan menaik; pembulatan hanya untuk tampilan. Tampilkan hingga tiga kandidat tanpa ambang minimum. Skor bukan prediksi ML, probabilitas, atau jaminan keamanan alergi.
 
@@ -299,9 +301,10 @@ Aturan layanan pada mode prototipe:
 - Kalori dan prioritas nutrisi digunakan sebagai **skor**, bukan filter wajib.
 - Rentang kalori: Rendah < 300; Sedang 300–500 (inklusif); Tinggi > 500 kkal per porsi.
 - Prioritas nutrisi dipilih tepat satu dan hanya menjadi skor, bukan filter.
-  Protein/Karbohidrat/Lemak memakai normalisasi min-max proporsi energi seluruh katalog
-  bergizi valid, sebelum filter alergi; rentang konstan memberi skor netral 0.5.
-  Seimbang memakai acuan 15/55/30 parameter prototipe, bukan saran medis individual.
+  Pada endpoint content-based lama, Protein/Karbohidrat/Lemak memakai normalisasi
+  min-max proporsi energi seluruh katalog bergizi valid, sebelum filter alergi;
+  rentang konstan memberi skor netral 0.5. Content-based lama tetap memakai acuan
+  Seimbang 15/55/30 sebagai parameter prototipe, bukan saran medis individual.
 - Energi makro = 4×protein + 4×karbohidrat + 9×lemak; nilai kalori sumber tetap utuh.
 - **Skor CB** = 100 × (0.5 × skor_kalori + 0.5 × skor_prioritas), rentang 0–100;
   bobot 50:50 adalah parameter awal. Bukan prediksi ML, probabilitas, atau keamanan alergi.
@@ -439,9 +442,9 @@ python scripts/prepare_survey.py \
 
 ### 12.5. Perbedaan Makna "Seimbang"
 
-- Pada survei: "Seimbang (tidak ada prioritas khusus)" — pengguna memilih tanpa prioritas khusus.
-- Pada backend: prioritas "Seimbang" memakai acuan komposisi 15% protein / 55% karbohidrat / 30% lemak.
-- Perbedaan ini sengaja tidak digabung; backend tidak memperlakukan pilihan survei sebagai acuan backend.
+- Pada survei dan model eksploratif: "Seimbang (tidak ada prioritas khusus)" berarti pengguna tidak memilih prioritas makro tertentu.
+- Pada hybrid, arti tersebut dipertahankan: skor CB hanya kecocokan kalori, kategori model dikirim dengan label training legacy, lalu keduanya digabung dengan alpha.
+- Hanya endpoint content-based lama yang tetap memakai acuan komposisi 15% protein / 55% karbohidrat / 30% lemak. Perilaku endpoint tersebut tidak diubah.
 
 ### 12.6. Pembagian Data ML
 

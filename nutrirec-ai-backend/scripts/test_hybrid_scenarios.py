@@ -63,7 +63,7 @@ def main(argv=None):
                     invalid_scores.append("lebih dari 3 makanan ditampilkan")
                 if result.get("jumlah_kandidat_setelah_filter_alergi", 0) < len(candidates):
                     invalid_scores.append("hasil lebih banyak daripada kandidat")
-                if priority != "Seimbang" and result.get("status") == "ok":
+                if result.get("status") == "ok":
                     if result.get("jumlah_kandidat_sama_untuk_semua_ranking") != result.get("jumlah_kandidat_setelah_filter_alergi"):
                         invalid_scores.append("jumlah kandidat ranking berbeda")
                     for key, expected_rank in (("top3_cb", "S_CB"), ("top3_ml", "S_ML"), ("top3_hybrid_all", "S_hybrid")):

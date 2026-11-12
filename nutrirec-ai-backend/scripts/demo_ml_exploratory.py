@@ -249,25 +249,25 @@ def _infer_hybrid(model_dir, dataset, model_name, target, priority, allergy_stat
                 "makanan_dikeluarkan_input_invalid": invalid, "makanan_dikeluarkan_alergi": allergy_excluded,
                 "peringatan": "Tidak ada makanan yang dimasukkan kembali setelah filter alergi."}
 
-    cb_supported = priority != "Seimbang"
-    if cb_supported:
-        # Preserve the full candidate ranking from the shared service helper.
-        cb_ranked_full = eligible
-        cb_details_by_id = {row["makanan"].id_makanan: {key: row[key] for key in ("skor_kalori", "skor_prioritas", "skor_content_based")} for row in cb_ranked_full}
-        eligible = cb_ranked_full
-    else:
-        # Do not invoke CB with legacy "no special priority" as if it meant the new 15/55/30 ratio.
-        ml_eligible_foods = [food for food in foods if allergy_status != "memiliki" or _lolos_alergi(food, set(allergen_ids))]
-        cb_details_by_id = {}
-        cb_ranked_full = []
-        ml_features_by_id = features_by_id
-        if not ml_eligible_foods:
-            return {"mode": "ml_eksploratif_cb_seimbang_tidak_didukung", "status": "kosong", "model": model_name,
-                    "dukungan_cb_seimbang": False, "jumlah_kandidat_setelah_filter_alergi": 0,
-                    "top3_cb": [], "top3_ml": [], "rekomendasi_demo": [], "catatan_cb": "Seimbang legacy tidak dipetakan ke CB 15/55/30.",
-                    "alasan_kosong": "Tidak ada kandidat setelah filter alergi wajib; fallback ML tidak mengendurkan filter."}
-        eligible = [{"makanan": food} for food in ml_eligible_foods]
-        features_by_id = {food.id_makanan: features_by_id[food.id_makanan] for food in ml_eligible_foods}
+    # Preserve all candidates after the shared mandatory allergy filter. In hybrid,
+    # legacy survey Seimbang means no macro priority, so its CB component is calorie fit only.
+    cb_ranked_full = eligible
+    cb_details_by_id = {}
+    for row in cb_ranked_full:
+        detail = {key: row[key] for key in ("skor_kalori", "skor_prioritas", "skor_content_based")}
+        if priority == "Seimbang":
+            detail["skor_prioritas"] = None
+            detail["skor_content_based"] = 100.0 * row["skor_kalori"]
+        cb_details_by_id[row["makanan"].id_makanan] = detail
+    if priority == "Seimbang":
+        cb_ranked_full = sorted(
+            cb_ranked_full,
+            key=lambda row: (
+                -cb_details_by_id[row["makanan"].id_makanan]["skor_content_based"],
+                row["makanan"].id_makanan,
+            ),
+        )
+    eligible = cb_ranked_full
 
     matrix = np.asarray([[features_by_id[row["makanan"].id_makanan]["features"][name] for name in FEATURES] for row in eligible], dtype=object)
     predictions = model.predict(matrix).astype(int)
@@ -280,20 +280,16 @@ def _infer_hybrid(model_dir, dataset, model_name, target, priority, allergy_stat
         score_ml = 100.0 * (expected_rating - 1.0) / 3.0
         food = candidate["makanan"]
         cb = cb_details_by_id.get(food.id_makanan)
-        score_hybrid = alpha * cb["skor_content_based"] + (1.0 - alpha) * score_ml if cb else None
+        score_hybrid = alpha * cb["skor_content_based"] + (1.0 - alpha) * score_ml
         scored.append({"makanan": food, "features": features_by_id[food.id_makanan]["features"],
                        "prediction": int(prediction), "probabilities": probabilities,
                        "expected_rating": expected_rating, "S_ML": score_ml,
                        "CB": cb, "S_hybrid": score_hybrid})
 
     ml_ranked = sorted(scored, key=lambda row: (-row["S_ML"], row["makanan"].id_makanan))
-    if cb_supported:
-        by_id = {row["makanan"].id_makanan: row for row in scored}
-        cb_ranked = [by_id[row["makanan"].id_makanan] for row in cb_ranked_full]
-        hybrid_ranked = combine_and_rank(cb_details_by_id, ml_ranked, alpha)
-    else:
-        cb_ranked = []
-        hybrid_ranked = ml_ranked
+    by_id = {row["makanan"].id_makanan: row for row in scored}
+    cb_ranked = [by_id[row["makanan"].id_makanan] for row in cb_ranked_full]
+    hybrid_ranked = combine_and_rank(cb_details_by_id, ml_ranked, alpha)
 
     def present(row):
         food, cb = row["makanan"], row["CB"]
@@ -306,17 +302,16 @@ def _infer_hybrid(model_dir, dataset, model_name, target, priority, allergy_stat
                 "expected_rating": row["expected_rating"], "S_ML": row["S_ML"], "alpha": alpha if cb else None,
                 "S_hybrid": row["S_hybrid"], "fitur_input": row["features"]}
 
-    ml_only_mode = not cb_supported
     candidate_count = len(scored)
-    return {"mode": "ml_eksploratif_cb_seimbang_tidak_didukung" if ml_only_mode else "hybrid_eksploratif",
+    return {"mode": "hybrid_eksploratif",
             "status": "ok", "model": model_name, "versi_eksperimen": config["mode"] + ":" + config["source_run_id"],
             "sumber_model": str(model_path.resolve()), "hash_katalog": catalog_hash,
             "input_pengguna": {"target_kalori": target, "prioritas_survei": PRIORITIES[priority], "status_alergi": allergy_status,
-                               "alergen_ids": allergen_ids, "alpha": alpha if cb_supported else None},
+                               "alergen_ids": allergen_ids, "alpha": alpha},
             "jumlah_kandidat_setelah_filter_alergi": candidate_count, "jumlah_kandidat_sama_untuk_semua_ranking": candidate_count,
-            "jumlah_hasil_top3": min(3, len(hybrid_ranked)), "dukungan_cb_seimbang": cb_supported,
+            "jumlah_hasil_top3": min(3, len(hybrid_ranked)), "dukungan_cb_seimbang": True,
             "peringatan": "Hybrid/ML eksploratif; S_ML adalah nilai harapan rating tertransformasi, bukan akurasi/keamanan. Filter alergi wajib tetap berlaku. Belum model produksi atau klaim peningkatan.",
-            "catatan_cb": "Seimbang survei legacy = tanpa prioritas khusus; tidak dipetakan ke 15/55/30." if ml_only_mode else "S_CB dihitung oleh helper layanan CB bersama.",
+            "catatan_cb": "Seimbang survei legacy = tanpa prioritas khusus; skor CB hybrid hanya memakai kecocokan kalori." if priority == "Seimbang" else "S_CB dihitung oleh helper layanan CB bersama.",
             "top3_cb": [present(row) for row in cb_ranked[:3]], "top3_ml": [present(row) for row in ml_ranked[:3]],
             "top3_hybrid_all": [present(row) for row in hybrid_ranked], "rekomendasi_demo": [present(row) for row in hybrid_ranked[:3]],
             "makanan_dikeluarkan_input_invalid": invalid, "makanan_dikeluarkan_alergi": allergy_excluded}
