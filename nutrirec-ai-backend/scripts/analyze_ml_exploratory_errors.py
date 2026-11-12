@@ -44,6 +44,9 @@ def analyze(experiment_dir):
     predictions = read_csv(folder / "test_predictions.csv")
     metrics = json.loads((folder / "metrics.json").read_text(encoding="utf-8"))
     split_dir = Path(manifest["source_split"])
+    if not split_dir.is_absolute():
+        split_dir = folder / split_dir
+    split_dir = split_dir.resolve()
     test_rows = read_csv(split_dir / "test.csv")
     profiles = {(row["submission_uid"], row["no_makanan_excel"]): row for row in test_rows}
     result = {

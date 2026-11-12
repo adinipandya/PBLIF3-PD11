@@ -170,6 +170,29 @@ python scripts/import_dataset.py --file ../data/Dataset_makanan_fix.xlsx
 python scripts/import_dataset.py --file ../data/Dataset_makanan_fix.xlsx --dry-run
 ```
 
+Impor katalog tidak menggunakan kolom `STATUS ALERGEN` lama untuk menaikkan
+status verifikasi. Relasi yang sudah ada tidak dihapus atau ditimpa; relasi baru
+dimulai sebagai `Belum diverifikasi`. Untuk sinkronisasi bukti verifikasi,
+gunakan perintah khusus berikut (dry-run adalah mode default dan tidak menulis
+database):
+
+```bash
+python scripts/sync_allergen_verification.py --file ../data/Dataset_makanan_fix.xlsx --dry-run
+python scripts/sync_allergen_verification.py --file ../data/Dataset_makanan_fix.xlsx --apply
+```
+
+Workbook mempertahankan sheet yang ada dan menggunakan sheet `Verifikasi
+Alergen` dengan kolom `ID Makanan`, `Nama Makanan`, `ID Alergen`, `Nama
+Alergen`, `Bahan Penyebab`, `Status Verifikasi`, `Sumber Referensi`, dan
+`Catatan Verifikasi`. `WAKTU VERIFIKASI` dan `ID PENGELOLA` dapat ditambahkan
+sebagai kolom audit opsional. Sinkronisasi memvalidasi pasangan ID dan nama
+terhadap database serta pasangan di sheet `Dataset`. Hanya status
+`Terverifikasi` dengan bahan, sumber referensi, dan catatan yang lengkap yang
+dapat direncanakan untuk sinkronisasi; baris pending diabaikan. Kolom audit
+database bersifat nullable dan harus tersedia sebelum perubahan diterapkan.
+Pasangan tidak pernah dihapus. Tinjau dry-run dan dapatkan persetujuan sebelum
+menjalankan `--apply`; perintah apply bukan bagian dari setup biasa.
+
 Aturan impor:
 
 - Membaca sheet `Dataset` dari file Excel (openpyxl, `data_only=True`).
@@ -540,3 +563,33 @@ terkalibrasi; eksperimen ini bukan validasi produksi atau jaminan keamanan alerg
 Hilangkan `--dry-run` untuk menulis analisis ke direktori baru. Analisis tidak
 melatih ulang model; kesalahan per kelas, profil, makanan, dan fold bersifat
 deskriptif, khususnya untuk subkelompok kecil dan kelas langka.
+
+## Riwayat rekomendasi anonim per sesi kiosk
+
+Backend mendukung penyimpanan riwayat tanpa akun/login. Frontend kiosk membuat UUID saat sesi penggunaan dimulai, lalu mengirimkannya melalui header `X-Session-ID` pada permintaan rekomendasi.
+
+Contoh membuat ID sesi di browser:
+
+```javascript
+const sessionId = sessionStorage.getItem("nutrirec_session_id") ?? crypto.randomUUID();
+sessionStorage.setItem("nutrirec_session_id", sessionId);
+```
+
+Kirim header berikut pada `POST /api/v1/recommendations/content-based`:
+
+```http
+X-Session-ID: 11111111-1111-4111-8111-111111111111
+```
+
+Endpoint riwayat:
+
+- `GET /api/v1/recommendation-history?session_id=<UUID>&limit=10` — melihat riwayat sesi (limit 1–50).
+- `DELETE /api/v1/recommendation-history?session_id=<UUID>` — menghapus riwayat sesi saat pengguna selesai.
+
+Header sesi bersifat opsional agar klien lama tetap kompatibel. Jika header tidak dikirim, rekomendasi tetap diberikan tetapi tidak disimpan ke riwayat. ID sesi bukan identitas pengguna; siapa pun yang mengetahui UUID dapat membaca atau menghapus riwayat sesi tersebut. Untuk kiosk bersama, buat ID baru untuk setiap pengguna dan hapus riwayat setelah sesi selesai. Riwayat tidak memuat nama, email, atau data akun.
+
+Jalankan migrasi database sebelum menggunakan fitur ini:
+
+```bash
+alembic upgrade head
+```

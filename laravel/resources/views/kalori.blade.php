@@ -1,64 +1,62 @@
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Target Kalori - NutriRec AI</title>
+@extends('layouts.app')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+@section('title', 'Target Kalori - NutriRec AI')
 
-    @vite(['resources/css/style.css', 'resources/js/app.js'])
-</head>
-<body>
+@section('content')
 
-    <!-- NAVBAR -->
-    <header class="navbar">
-        <a href="{{ url('/') }}" class="logo">
-            NutriRec <span>AI.</span>
-        </a>
+<main class="screen-content screen-calorie">
 
-        <div class="nav-status">
-            <span class="status-dot"></span>
-            Sistem Siap Digunakan
-        </div>
-    </header>
+    <section class="content">
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
+        <header class="question-header">
 
-        <section class="hero">
-            <span class="screen-step">LANGKAH 1 DARI 3 • TARGET KALORI</span>
-            <h1>Berapa target kalori Anda?</h1>
-        </section>
+            <span class="eyebrow">
+                LANGKAH 1 DARI 3 • TARGET KALORI
+            </span>
 
-        <!-- CALORIE SELECTION -->
-        <section class="steps-container">
+            <h1 class="heading">
+                Berapa target kalori Anda?
+            </h1>
 
-            <form action="{{ url('/prioritas') }}" method="GET" id="calorieForm">
+        </header>
 
-                <div class="calorie-options" id="calorieOptions"></div>
+        <!-- FORM TARGET KALORI -->
+        <form action="{{ url('/prioritas') }}"
+              method="GET"
+              id="calorieForm">
 
-                <!-- NAVIGATION BUTTONS -->
-                <div class="navigation-buttons">
-                    <button type="submit" class="btn-next" disabled>
-                        Lanjut →
-                    </button>
-                </div>
+            <input
+                type="hidden"
+                name="kalori"
+                id="selected-calorie"
+                value="{{ request('kalori') }}"
+            >
 
-            </form>
+            <!-- CARD DIBUAT OTOMATIS DARI API -->
+            <div
+                class="calorie-options choices"
+                id="calorieOptions">
+            </div>
 
-        </section>
+        </form>
 
-    </main>
+    </section>
 
-    <!-- FOOTER -->
-    <footer class="footer">© 2026 NutriRec AI Kiosk. All rights reserved.</footer>
+</main>
 
-    <!-- VALIDATION -->
+@endsection
 
 
-</body>
-</html>
+@section('actions')
+
+<button
+    type="submit"
+    form="calorieForm"
+    class="primary screen-action"
+    disabled
+>
+    Lanjut <span aria-hidden="true">→</span>
+</button>
+
+@endsection

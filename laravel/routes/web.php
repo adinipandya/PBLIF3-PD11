@@ -22,9 +22,7 @@ Route::get('/daftaralergi', function () {
     return view('daftaralergi');
 });
 
-Route::get('/preferensi', function () {
-    return view('preferensi');
-});
+Route::redirect('/preferensi', '/kalori');
 
 Route::get('/rekomendasi', function () {
     return view('rekomendasi');

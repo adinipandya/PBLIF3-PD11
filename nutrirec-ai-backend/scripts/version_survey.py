@@ -1,7 +1,31 @@
 """Versikan snapshot survei secara offline; UID adalah identitas kiriman, bukan orang."""
 import argparse
 import csv
-import fcntl
+import os
+
+if os.name == "nt":
+    import msvcrt
+
+    def lock_file(file):
+        file.seek(0)
+        if not file.read(1):
+            file.seek(0)
+            file.write("0")
+            file.flush()
+        file.seek(0)
+        msvcrt.locking(file.fileno(), msvcrt.LK_LOCK, 1)
+
+    def unlock_file(file):
+        file.seek(0)
+        msvcrt.locking(file.fileno(), msvcrt.LK_UNLCK, 1)
+else:
+    import fcntl
+
+    def lock_file(file):
+        fcntl.flock(file, fcntl.LOCK_EX)
+
+    def unlock_file(file):
+        fcntl.flock(file, fcntl.LOCK_UN)
 import hashlib
 import json
 import os
@@ -177,7 +201,7 @@ def main(argv=None):
         root.mkdir(parents=True, exist_ok=True)
         registry_path.parent.mkdir(parents=True, exist_ok=True)
         lock = (registry_path.parent / (registry_path.name + ".lock")).open("a+")
-        fcntl.flock(lock, fcntl.LOCK_EX)
+        lock_file(lock)
         stage = None
         try:
             current_registry = registry_path.read_bytes() if registry_path.exists() else None
@@ -219,7 +243,7 @@ def main(argv=None):
         finally:
             if stage is not None and stage.exists():
                 shutil.rmtree(stage)
-            fcntl.flock(lock, fcntl.LOCK_UN)
+            unlock_file(lock)
             lock.close()
         print(f"Versi: {target}; registry: {registry_path}")
         return 0

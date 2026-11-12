@@ -3,7 +3,7 @@
   "production_model": false,
   "source_ready_for_training": false,
   "source_split_manifest_sha256": "f43dd8d5b8f6ae9feae84b0e225fef134529489ce4aba97771820eec6531c2e2",
-  "source_split": "/Users/user/PBLIF3-PD11-1/PBLIF3-PD11/data/experiments/survey-v001/features-exploratory-split-002",
+  "source_split": "../features-exploratory-split-002",
   "source_run_id": "pd11-r2-cleanup-003",
   "input_sha256": {
     "train": "d6920895559ef503f8f53d5cb3671a29663d9268ec39cb49b70b573e68d5681c",

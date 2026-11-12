@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import json
 import shutil
 from pathlib import Path
@@ -19,6 +20,9 @@ FOODS = ROOT / "nutrirec-ai-backend/data/Dataset_makanan_revisi.xlsx"
     reason="The source survey processing run is private research data and is not distributed.",
 )
 def test_cleanup003_integrity_features_and_group_split(tmp_path):
+    source_manifest = json.loads((RUN / "processing_manifest.json").read_text(encoding="utf-8"))
+    if hashlib.sha256(FOODS.read_bytes()).hexdigest() != source_manifest.get("foods_sha256"):
+        pytest.skip("Exact historical catalog for cleanup-003 is unavailable; do not substitute the active Fix catalog.")
     out = tmp_path / "features-exploratory-split"
     split_report, counts, result_dir = split.create_artifacts(RUN, FOODS, out)
 
@@ -60,7 +64,6 @@ def test_cleanup003_integrity_features_and_group_split(tmp_path):
     assert manifest["source_run_training_flag"] is False
     assert manifest["source_run_id"] == "pd11-r2-cleanup-003"
     for name, expected in manifest["output_sha256"].items():
-        import hashlib
         assert hashlib.sha256((out / name).read_bytes()).hexdigest() == expected
 
 

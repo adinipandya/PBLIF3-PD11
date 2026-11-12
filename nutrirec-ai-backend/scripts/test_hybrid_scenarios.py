@@ -17,7 +17,7 @@ TARGETS = ("Rendah", "Sedang", "Tinggi")
 PRIORITIES = ("Protein", "Karbohidrat", "Lemak", "Seimbang")
 ALLERGIES = (("tidak", []), ("memiliki", [1]), ("memiliki", [1, 2]))
 MODEL_DIR = Path("../data/experiments/survey-v001/ml-eval-exploratory-001")
-DATASET = Path("../data/Dataset_makanan_revisi.xlsx")
+DATASET = Path("../data/Dataset_makanan_fix.xlsx")
 
 
 def results_equivalent(left, right, tolerance=1e-12):

@@ -54,7 +54,8 @@ def _buat_menu(
             protein=Decimal(str(protein)),
         )
     )
-    for id_alergen in allergen_ids or []:
+    # Default fixtures have known allergen data; pass [] to model missing relations.
+    for id_alergen in [3] if allergen_ids is None else allergen_ids:
         db.add(
             KandunganAlergen(
                 id_makanan=id_makanan,
@@ -190,6 +191,7 @@ def test_rekomendasi_alergi_tunggal_menolak_data_tidak_aman(
     _buat_menu(
         db_session, 202, "Menu Tanpa Relasi",
         150, 10, 8, 8, "Rendah",
+        [],
     )
 
     # 203: mengandung Kedelai terverifikasi, bukan Telur → lolos.
@@ -229,6 +231,31 @@ def test_rekomendasi_alergi_tunggal_menolak_data_tidak_aman(
     assert 202 not in ids
     assert 204 not in ids
     assert 205 not in ids
+
+
+def test_rekomendasi_tanpa_alergi_menolak_data_alergen_tidak_diketahui(
+    client: TestClient, db_session, seed_referensi
+):
+    _buat_menu(
+        db_session, 401, "Menu Terverifikasi",
+        150, 10, 8, 8, "Rendah",
+        [2], status="Terverifikasi",
+    )
+    _buat_menu(
+        db_session, 402, "Menu Pending",
+        150, 10, 8, 8, "Rendah",
+        [2], status="Belum diverifikasi",
+    )
+    _buat_menu(
+        db_session, 403, "Menu Tanpa Relasi",
+        150, 10, 8, 8, "Rendah",
+        [],
+    )
+
+    resp = _kirim_permintaan(client, status_alergi=False)
+
+    assert resp.status_code == 200
+    assert [item["id_makanan"] for item in resp.json()["kandidat"]] == [401]
 
 
 def test_rekomendasi_alergi_multi_mengeluarkan_semua_id_pilihan(client: TestClient, db_session, seed_referensi):
@@ -346,8 +373,9 @@ def test_rekomendasi_katalog_satu_item_prioritas_netral(client: TestClient, db_s
     item = resp.json()["kandidat"][0]
     assert float(item["skor_prioritas"]) == 0.5
 
-
-def test_skor_prioritas_makanan_tunggal_tetap_netral_setelah_filter_alergi(client: TestClient, db_session, seed_referensi):
+def test_skor_prioritas_makanan_tunggal_tetap_netral_setelah_filter_alergi(
+    client: TestClient, db_session, seed_referensi
+):
     _buat_menu(db_session, 101, "Menu Telur", 400, 20, 40, 10, "Sedang", [1])
     _buat_menu(db_session, 102, "Menu Kedelai", 400, 10, 80, 5, "Sedang", [2])
 
@@ -359,7 +387,9 @@ def test_skor_prioritas_makanan_tunggal_tetap_netral_setelah_filter_alergi(clien
     assert float(items[0]["skor_prioritas"]) == 1.0
 
 
-def test_rekomendasi_prioritas_tie_break_id_naik(client: TestClient, db_session, seed_referensi):
+def test_rekomendasi_prioritas_tie_break_id_naik(
+    client: TestClient, db_session, seed_referensi
+):
     for id_makanan in (102, 101, 103, 104):
         _buat_menu(db_session, id_makanan, f"Menu {id_makanan}", 400, 20, 40, 10, "Sedang")
 
@@ -371,7 +401,9 @@ def test_rekomendasi_prioritas_tie_break_id_naik(client: TestClient, db_session,
     assert len({item["skor_content_based"] for item in items}) == 1
 
 
-def test_rekomendasi_satu_dua_dan_maksimal_tiga_kandidat(client: TestClient, db_session, seed_referensi):
+def test_rekomendasi_satu_dua_dan_maksimal_tiga_kandidat(
+    client: TestClient, db_session, seed_referensi
+):
     expected_counts = (1, 2, 3)
     for index in range(4):
         _buat_menu(db_session, index + 1, f"Menu {index}", 400, 20, 40, 10, "Sedang")
@@ -399,3 +431,18 @@ def test_rekomendasi_tidak_menampilkan_nasi_putih_dan_mengisi_top3_dari_kandidat
     assert all(item["nama_makanan"] != "Nasi Putih (Dijual Terpisah)" for item in items)
     assert any(item["nama_makanan"] == "Nasi Goreng" for item in items)
     assert len(items) == 3
+
+
+def test_rekomendasi_skor_sama_diurutkan_berdasarkan_id(
+    client: TestClient, db_session, seed_referensi
+):
+    _buat_menu(db_session, 102, "Nasi Ayam", 400, 20, 50, 10, "Sedang")
+    _buat_menu(db_session, 101, "Mie Ayam", 400, 20, 50, 10, "Sedang")
+
+    resp = _kirim_permintaan(client)
+
+    assert resp.status_code == 200
+    kandidat = resp.json()["kandidat"]
+    ids = [item["id_makanan"] for item in kandidat]
+
+    assert ids == [101, 102]
