@@ -5,7 +5,7 @@ Skrip persiapan data survei NutriRec AI untuk keperluan ML.
 Cara pakai:
   python scripts/prepare_survey.py \
     --file "data/NutriRec-AI (Jawaban).xlsx" \
-    --foods "data/Dataset_makanan_revisi.xlsx" \
+    --foods "../data/Dataset_makanan_fix.xlsx" \
     --output-dir data/processed \
     --dry-run
 
@@ -895,7 +895,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--foods",
         required=True,
-        help='Path file dataset Excel, mis. "data/Dataset_makanan_revisi.xlsx"',
+        help='Path file katalog makanan aktif, mis. "../data/Dataset_makanan_fix.xlsx"',
     )
     parser.add_argument(
         "--output-dir",

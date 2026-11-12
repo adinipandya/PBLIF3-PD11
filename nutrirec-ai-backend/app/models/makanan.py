@@ -77,8 +77,8 @@ class Makanan(Base):
     versi_dataset: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        default="revisi-PD11-R1",
-        comment="Versi dataset sumber (mis. revisi-PD11-R1)",
+        default="fix-PD11-R1",
+        comment="Versi dataset sumber (mis. fix-PD11-R1)",
     )
     dibuat_pada: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False

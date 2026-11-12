@@ -266,7 +266,9 @@ def train_and_evaluate(split_dir, output_dir, dry_run=False):
             "status": "completed_exploratory_holdout_evaluation", "production_model": False,
             "source_ready_for_training": input_manifest["source_run_training_flag"],
             "source_split_manifest_sha256": sha(Path(split_dir) / "manifest.json"),
-            "source_split": str(Path(split_dir).resolve()), "source_run_id": input_manifest["source_run_id"],
+            "source_split": Path(os.path.relpath(
+                Path(split_dir).resolve(), Path(output).resolve().parent
+            )).as_posix(), "source_run_id": input_manifest["source_run_id"],
             "input_sha256": {"train": sha(Path(split_dir) / "train.csv"), "test": sha(Path(split_dir) / "test.csv"), "schema": sha(Path(split_dir) / "feature_schema.json")},
             "models": models, "output_sha256": output_hashes,
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),

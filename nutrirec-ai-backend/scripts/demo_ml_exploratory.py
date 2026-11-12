@@ -17,6 +17,7 @@ from scripts.prepare_ml_exploratory_split import ALLERGENS, TEST_FRACTION, VERSI
 from scripts.train_ml_exploratory import LABELS, class_probabilities, read_csv, sha
 from app.core.recommendation_rules import NUTRIENT_PRIORITIES
 from app.services.makanan_service import (
+    _lolos_alergi,
     _baca_nutrisi,
     urutkan_katalog_kandidat,
     hitung_skor_katalog,
@@ -113,8 +114,8 @@ def combine_and_rank(cb_by_id, ml_rows, alpha):
 
 def _load_model_context(model_dir, model_name):
     manifest, model_path = validate_artifacts(model_dir, model_name)
-    split_dir = Path(manifest["source_split"])
-    if not split_dir.exists():
+    split_dir = _resolve_source_split(model_dir, manifest.get("source_split"))
+    if split_dir is None:
         raise ValueError("Direktori split sumber tidak tersedia")
     split_manifest = json.loads((split_dir / "manifest.json").read_text(encoding="utf-8"))
     if split_manifest.get("source_run_id") != "pd11-r2-cleanup-003" or split_manifest.get("ready_for_training") is not False:
@@ -130,6 +131,31 @@ def _load_model_context(model_dir, model_name):
     if not hasattr(model, "predict") or not hasattr(model, "predict_proba"):
         raise ValueError("Pipeline tersimpan tidak menyediakan predict dan predict_proba")
     return manifest, model_path, config, model
+
+
+def _resolve_source_split(model_dir, source_split):
+    """Resolve current relative metadata and legacy machine-absolute paths."""
+    if not isinstance(source_split, str) or not source_split.strip():
+        return None
+
+    model_dir = Path(model_dir)
+    stored_path = Path(source_split)
+    candidates = []
+    if stored_path.is_absolute():
+        candidates.append(stored_path)
+    else:
+        candidates.extend((model_dir.parent / stored_path, model_dir / stored_path))
+
+    # Older manifests stored the split's absolute path from the training Mac.
+    # The split directory is a sibling of the model directory in the experiment.
+    candidates.append(model_dir.parent / stored_path.name)
+    seen = set()
+    for candidate in candidates:
+        normalized = candidate.resolve()
+        if normalized not in seen and normalized.is_dir():
+            return normalized
+        seen.add(normalized)
+    return None
 
 def _infer_hybrid(model_dir, dataset, model_name, target, priority, allergy_status, allergen_ids, alpha=0.5):
     if priority not in PRIORITIES:

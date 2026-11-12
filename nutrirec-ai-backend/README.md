@@ -40,12 +40,12 @@ Dari direktori `nutrirec-ai-backend` jalankan:
 
 ```bash
 .venv/bin/python scripts/demo_content_based.py \\
-  --dataset ../data/Dataset_makanan_revisi.xlsx \\
+  --dataset ../data/Dataset_makanan_fix.xlsx \\
   --target-kalori Sedang --prioritas Protein \\
   --status-alergi tidak
 
 .venv/bin/python scripts/demo_content_based.py \\
-  --dataset ../data/Dataset_makanan_revisi.xlsx \\
+  --dataset ../data/Dataset_makanan_fix.xlsx \\
   --target-kalori Rendah --prioritas Seimbang \\
   --status-alergi memiliki --alergen-ids 1 2 \\
   --output-json /tmp/nutrirec-demo.json
@@ -53,7 +53,17 @@ Dari direktori `nutrirec-ai-backend` jalankan:
 
 Skrip membutuhkan dependensi backend yang tercantum di `requirements.txt` (termasuk `openpyxl`, SQLAlchemy, dan driver aplikasi), namun membaca file katalog lokal dan tidak menghubungi database. Excel memakai sheet `Dataset` dan kolom yang sama dengan `scripts/import_dataset.py`; CSV harus memiliki header `NO,NAMA,KALORI,KARBO,LEMAK,PROTEIN,PORSI,ALERGEN,STATUS AL.`. Pemetaan token alergen eksplisit menggunakan `PETA_ALERGEN`/`parse_alergen_tercatat` yang sama dengan proses impor; ID alergen demo ditetapkan eksplisit sesuai referensi model (1–11), bukan berdasarkan nomor baris. Jika token tidak dikenal, skrip mengembalikan error, bukan menebak.
 
-CLI memakai aturan bersama `app/core/recommendation_rules.py` dan mesin layanan `filter_dan_rekomendasikan` yang sama dengan API. API tetap memerlukan database yang telah disiapkan; Laravel hanya antarmuka yang memanggil API dan tidak menjalankan perhitungan rekomendasi lokal. CLI membentuk katalog sementara di memori dari file, tidak menulis database atau hasil pengguna kecuali `--output-json` diminta. Katalog aktual saat ini menandai semua relasi alergen sebagai belum diverifikasi, sehingga permintaan alergi secara benar dapat menghasilkan nol kandidat.
+CLI memakai aturan bersama `app/core/recommendation_rules.py` dan mesin layanan `filter_dan_rekomendasikan` yang sama dengan API. API tetap memerlukan database yang telah disiapkan; Laravel hanya antarmuka yang memanggil API dan tidak menjalankan perhitungan rekomendasi lokal. CLI membentuk katalog sementara di memori dari file, tidak menulis database atau hasil pengguna kecuali `--output-json` diminta. Katalog aktif adalah `../data/Dataset_makanan_fix.xlsx` dan mencatat status `Terverifikasi` pada seluruh 20 menu. Status berasal dari workbook aktif; tetap tinjau bukti sumber dan jangan menafsirkannya sebagai jaminan medis.
+
+## Audit dataset dengan Pandas (read-only)
+
+Audit katalog Excel dan survei tanpa mengubah sumber:
+
+```bash
+.venv/bin/python scripts/audit_dataset_pandas.py
+```
+
+Secara default skrip membaca `../data/Dataset_makanan_fix.xlsx` dan `../data/NutriRec-AI (Jawaban).xlsx` relatif terhadap lokasi skrip. Gunakan `--output-dir <direktori-baru>` untuk menulis `audit_report.json`; direktori yang sudah ada ditolak. Skrip memakai aturan header, mapping survei, dan parser rating proyek; nilai kosong tidak diisi, dan relasi alergen kosong tidak ditafsirkan sebagai bebas alergen.
 
 ## Demo interaktif offline
 
@@ -121,7 +131,7 @@ DATABASE_URL=mysql+pymysql://nutrirec_user:<password>@<host>:3306/nutrirec_db
 APP_ENV=development
 DEBUG=true
 ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:5500,http://127.0.0.1:8001,http://localhost:8001
-DATASET_VERSION=revisi-PD11-R1
+DATASET_VERSION=fix-PD11-R1
 ```
 
 Aturan pemetaan:
@@ -156,8 +166,8 @@ Migrasi yang tersedia:
 ## 6. Impor Dataset
 
 ```bash
-python scripts/import_dataset.py --file Dataset_makanan_revisi.xlsx
-python scripts/import_dataset.py --file Dataset_makanan_revisi.xlsx --dry-run
+python scripts/import_dataset.py --file ../data/Dataset_makanan_fix.xlsx
+python scripts/import_dataset.py --file ../data/Dataset_makanan_fix.xlsx --dry-run
 ```
 
 Aturan impor:
@@ -354,7 +364,7 @@ Jalankan dari direktori backend. Jika sumber berada di direktori induk seperti
 pada proyek ini, gunakan `../data/` sebagai awalan seluruh path data. Contoh:
 
 ```bash
-.venv/bin/python scripts/prepare_survey.py --file '../data/NutriRec-AI (Jawaban).xlsx' --foods '../data/Dataset_makanan_revisi.xlsx' --output-dir ../data/processed --dry-run
+.venv/bin/python scripts/prepare_survey.py --file '../data/NutriRec-AI (Jawaban).xlsx' --foods '../data/Dataset_makanan_fix.xlsx' --output-dir ../data/processed --dry-run
 ```
 
 Hilangkan `--dry-run` untuk ekspor. `lolos_pemeriksaan_dasar` hanya menyatakan
@@ -368,7 +378,7 @@ offline. ID referensi migrasi memakai auto-increment dan juga perlu diperiksa.
 ### 12.1. File
 
 - Sumber survei: `data/NutriRec-AI (Jawaban).xlsx`
-- Sumber dataset: `data/Dataset_makanan_revisi.xlsx`
+- Sumber katalog aktif: `data/Dataset_makanan_fix.xlsx`
 - Hasil pemeriksaan awal: `data/survey_review/`
 - Output persiapan: `data/processed/`
 
@@ -378,14 +388,14 @@ offline. ID referensi migrasi memakai auto-increment dan juga perlu diperiksa.
 # Dry-run: baca, validasi, tampilkan ringkasan; tidak menulis file
 python scripts/prepare_survey.py \
   --file "../data/NutriRec-AI (Jawaban).xlsx" \
-  --foods "../data/Dataset_makanan_revisi.xlsx" \
+  --foods "../data/Dataset_makanan_fix.xlsx" \
   --output-dir ../data/processed \
   --dry-run
 
 # Export: menulis survey_responses.csv, survey_ratings_long.csv, survey_validation_report.json
 python scripts/prepare_survey.py \
   --file "../data/NutriRec-AI (Jawaban).xlsx" \
-  --foods "../data/Dataset_makanan_revisi.xlsx" \
+  --foods "../data/Dataset_makanan_fix.xlsx" \
   --output-dir ../data/processed
 ```
 
@@ -481,7 +491,7 @@ Dari backend, periksa terlebih dahulu tanpa menulis berkas:
 ```bash
 .venv/bin/python scripts/process_survey_version.py \
   --version-dir ../data/survey_versions/survey-v001 \
-  --foods ../data/Dataset_makanan_revisi.xlsx --dry-run
+  --foods ../data/Dataset_makanan_fix.xlsx --dry-run
 ```
 
 Untuk ekspor, hilangkan `--dry-run` dan tambahkan `--run-id run-001`
@@ -497,7 +507,7 @@ pemrosesan mencatat hash masukan, aturan dan keluaran agar hasil dapat diaudit.
 
 ### Pemeriksaan fungsional hybrid eksploratif
 
-Matriks aktual 36 input (3 target × 4 prioritas × 3 kondisi alergi), model tersimpan Random Forest, alpha 0,5 dan katalog revisi-PD11-R1 disimpan di `data/experiments/survey-v001/hybrid-scenario-matrix-005/`. Hasilnya: 9 kombinasi tanpa alergi berhasil sebagai CB/ML/hybrid untuk prioritas Protein/Karbohidrat/Lemak; 24 kondisi alergi kosong sesuai filter wajib; 3 prioritas Seimbang legacy menampilkan ML eksploratif saja karena definisinya bukan rasio CB 15/55/30; 0 gagal. Hasil uji fungsional bukan bukti peningkatan kualitas, bukan model produksi, dan status alergen tidak diubah.
+Catatan historis: matriks 36 input pada `data/experiments/survey-v001/hybrid-scenario-matrix-005/` dibuat dengan katalog Revisi dan tidak mewakili katalog aktif Fix. Hasil lama dipertahankan sebagai arsip; untuk uji ulang, jalankan skrip matriks dengan katalog Fix dan direktori output baru. Hasil uji fungsional bukan bukti peningkatan kualitas atau model produksi.
 
 ## 16. Eksperimen ML awal offline
 

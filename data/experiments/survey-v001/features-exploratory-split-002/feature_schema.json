@@ -1,0 +1,81 @@
+{
+  "fitur_diizinkan": [
+    "target_kalori",
+    "prioritas",
+    "status_alergi",
+    "alergen_1",
+    "alergen_2",
+    "alergen_3",
+    "alergen_4",
+    "alergen_5",
+    "alergen_6",
+    "alergen_7",
+    "alergen_8",
+    "alergen_9",
+    "alergen_10",
+    "alergen_11",
+    "kalori_kkal",
+    "protein_g",
+    "karbohidrat_g",
+    "lemak_g"
+  ],
+  "target": {
+    "y": "rating asli survei, 1-4"
+  },
+  "metadata_bukan_fitur": [
+    "response_id",
+    "submission_uid",
+    "evaluation_group_id",
+    "source_row",
+    "timestamp",
+    "dataset_version",
+    "form_version",
+    "source_namespace",
+    "nama_makanan_survei",
+    "nama_makanan_dataset",
+    "no_makanan_excel",
+    "rating_asli",
+    "penanda_kiriman",
+    "penanda_penilaian",
+    "status_eksploratif",
+    "alasan_tinjau_eksploratif",
+    "status_pemetaan",
+    "alasan_pemetaan",
+    "status_alergen_katalog",
+    "definisi_prioritas"
+  ],
+  "kategori": {
+    "target_kalori": [
+      "Rendah",
+      "Sedang",
+      "Tinggi"
+    ],
+    "prioritas": [
+      "Protein",
+      "Karbohidrat",
+      "Lemak",
+      "Seimbang (tidak ada prioritas khusus), makna legacy"
+    ]
+  },
+  "kamus_alergen_id": {
+    "telur": 1,
+    "kedelai": 2,
+    "jagung": 3,
+    "kelapa": 4,
+    "ayam": 5,
+    "daging sapi": 6,
+    "gandum": 7,
+    "kacang-kacangan": 8,
+    "udang/seafood": 9,
+    "ikan": 10,
+    "beras": 11
+  },
+  "satuan": {
+    "kalori_kkal": "kkal/porsi",
+    "protein_g": "g/porsi",
+    "karbohidrat_g": "g/porsi",
+    "lemak_g": "g/porsi"
+  },
+  "encoding": "fit encoder/scaler/imputer hanya pada train di tahap training; artefak fitur ini menyimpan nilai mentah/kategori",
+  "seimbang_legacy": "tanpa prioritas khusus; bukan rasio PD11-R2 15/55/30"
+}

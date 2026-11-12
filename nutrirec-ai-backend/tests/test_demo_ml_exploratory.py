@@ -11,9 +11,22 @@ from app.services.makanan_service import filter_dan_rekomendasikan, urutkan_kata
 ROOT = Path(__file__).resolve().parents[2]
 EXPERIMENT = ROOT / "data/experiments/survey-v001/ml-eval-exploratory-001"
 SPLIT = ROOT / "data/experiments/survey-v001/features-exploratory-split-002"
-FOODS = ROOT / "data/Dataset_makanan_revisi.xlsx"
+FOODS = ROOT / "data/Dataset_makanan_fix.xlsx"
 
 
+@pytest.mark.skipif(
+    not all(
+        path.is_file()
+        for path in (
+            SPLIT / "manifest.json",
+            SPLIT / "train.csv",
+            SPLIT / "test.csv",
+            SPLIT / "feature_schema.json",
+            EXPERIMENT / "test_predictions.csv",
+        )
+    ),
+    reason="Fixed survey holdout outputs are optional and are not distributed with the runtime model bundle.",
+)
 def test_stored_predictions_and_read_only_demo(monkeypatch):
     _, _, _, test_rows, _ = trainer.validate_split(SPLIT)
     _, model_path = demo.validate_artifacts(EXPERIMENT, "Random Forest")
@@ -54,23 +67,27 @@ def test_hybrid_alpha_extremes_filter_same_pool_and_seimbang_guard():
     assert [x["id_makanan"] for x in ml_only["rekomendasi_demo"]] == [x["id_makanan"] for x in ml_only["top3_ml"]]
     assert [x["id_makanan"] for x in cb_only["rekomendasi_demo"]] == [x["id_makanan"] for x in cb_only["top3_cb"]]
     for result in (ml_only, cb_only, mid):
-        assert result["jumlah_kandidat_setelah_filter_alergi"] == 20
+        assert result["jumlah_kandidat_setelah_filter_alergi"] == 19
         assert {x["id_makanan"] for x in result["top3_cb"]} <= {x["id_makanan"] for x in result["rekomendasi_demo"]} | {x["id_makanan"] for x in result["top3_cb"]}
     for item in mid["rekomendasi_demo"]:
         assert item["S_hybrid"] == pytest.approx(0.5 * item["S_CB"] + 0.5 * item["S_ML"])
     for allergen_ids in ([1], [1, 2]):
         result = demo.infer_hybrid(EXPERIMENT, FOODS, "Random Forest", "Sedang", "Protein", "memiliki", list(allergen_ids), 0.0)
-        assert result["status"] == "kosong"
-        assert result["jumlah_kandidat_setelah_filter_alergi"] == 0
-        assert result["rekomendasi_demo"] == []
+        assert result["status"] == "ok"
+        assert 0 < result["jumlah_kandidat_setelah_filter_alergi"] < 20
+        excluded_ids = {item["id_makanan"] for item in result["makanan_dikeluarkan_alergi"]}
+        assert excluded_ids
+        assert all(item["id_makanan"] not in excluded_ids for item in result["rekomendasi_demo"])
     balanced = demo.infer_hybrid(EXPERIMENT, FOODS, "Random Forest", "Sedang", "Seimbang", "tidak", [], 0.5)
     assert balanced["dukungan_cb_seimbang"] is False
     assert balanced["top3_cb"] == []
     assert all(item["S_CB"] is None and item["S_hybrid"] is None for item in balanced["rekomendasi_demo"])
     unsupported_allergy = demo.infer_hybrid(EXPERIMENT, FOODS, "Random Forest", "Sedang", "Seimbang", "memiliki", [1], 0.5)
-    assert unsupported_allergy["status"] == "kosong"
-    assert unsupported_allergy["jumlah_kandidat_setelah_filter_alergi"] == 0
-    assert unsupported_allergy["rekomendasi_demo"] == []
+    assert unsupported_allergy["status"] == "ok"
+    assert unsupported_allergy["dukungan_cb_seimbang"] is False
+    assert unsupported_allergy["jumlah_kandidat_setelah_filter_alergi"] == 13
+    assert len(unsupported_allergy["rekomendasi_demo"]) == 3
+    assert all(item["S_CB"] is None and item["S_hybrid"] is None for item in unsupported_allergy["rekomendasi_demo"])
 
 def test_input_and_schema_validation():
     with pytest.raises(ValueError, match="Pilih minimal"):
@@ -83,6 +100,18 @@ def test_input_and_schema_validation():
         demo.parse_number(float("inf"), "Kalori")
 
 
+@pytest.mark.skipif(
+    not all(
+        path.is_file()
+        for path in (
+            EXPERIMENT / "manifest.json",
+            EXPERIMENT / "metrics.json",
+            EXPERIMENT / "test_predictions.csv",
+            SPLIT / "test.csv",
+        )
+    ),
+    reason="Holdout predictions and survey split rows are optional research artifacts.",
+)
 def test_analysis_counts_and_rf_class_two_errors():
     _, report = __import__("scripts.analyze_ml_exploratory_errors", fromlist=["analyze"]).analyze(EXPERIMENT)
     assert report["random_forest_true_class_2"]["rows"] == 50

@@ -58,7 +58,7 @@ def isi_nutrisi(food):
 def fixture_db_catalog(food):
     wb = load_workbook(food, data_only=True, read_only=True)
     rows = list(wb["Dataset"].values); wb.close()
-    return {int(row[0]): {"id_makanan": int(row[0]), "nama": row[1], "porsi": row[6], "versi_dataset": "revisi-PD11-R1", "kalori": row[2], "protein": row[3], "karbohidrat": row[4], "lemak": row[5]} for row in rows[1:]}
+    return {int(row[0]): {"id_makanan": int(row[0]), "nama": row[1], "porsi": row[6], "versi_dataset": "fix-PD11-R1", "kalori": row[2], "protein": row[3], "karbohidrat": row[4], "lemak": row[5]} for row in rows[1:]}
 
 
 def test_run_sintetis_validasi_hash_dan_dry_run(project, tmp_path):

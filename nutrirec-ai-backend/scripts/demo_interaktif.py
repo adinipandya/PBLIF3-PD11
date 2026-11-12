@@ -14,7 +14,7 @@ if str(BACKEND_DIR) not in sys.path:
 from scripts.demo_content_based import ALERGEN_IDS, run as run_content_based  # noqa: E402
 from scripts.demo_ml_exploratory import infer as infer_ml, infer_hybrid  # noqa: E402
 
-DATASET = REPO_DIR / "data" / "Dataset_makanan_revisi.xlsx"
+DATASET = REPO_DIR / "data" / "Dataset_makanan_fix.xlsx"
 MODEL_DIR = REPO_DIR / "data" / "experiments" / "survey-v001" / "ml-eval-exploratory-001"
 MODEL_NAME = "Random Forest"
 ALPHA = 0.5

@@ -82,7 +82,7 @@ def build_catalog(rows):
         food = Makanan(id_makanan=food_id, nama_makanan=name,
                        deskripsi_porsi=row.get("G") or "Tidak tersedia",
                        sumber_data=row.get("N") or "Tidak tersedia",
-                       versi_dataset=row.get("Q") or "revisi-PD11-R1")
+                       versi_dataset=row.get("Q") or "fix-PD11-R1")
         food.informasi_gizi = InformasiGizi(id_makanan=food_id, kalori=calories,
                                              protein=protein, karbohidrat=carbs, lemak=fat)
         status = row.get("O")
@@ -168,7 +168,7 @@ def run(dataset, target, priority, allergy, allergen_ids):
             "karbohidrat_g": float(g.karbohidrat), "lemak_g": float(g.lemak), **d,
             "penjelasan": f"Skor kalori {d['skor_kalori']:.4f} dan skor prioritas {d['skor_prioritas']:.4f}; bobot masing-masing 0,5."})
     metadata = {"path": str(dataset.resolve()), "sha256": digest,
-                "versi": next(iter({str(r.get("Q") or "revisi-PD11-R1") for r in rows}), "sumber-katalog")}
+                "versi": next(iter({str(r.get("Q") or "fix-PD11-R1") for r in rows}), "sumber-katalog")}
     payload = {"status": "ok" if recommendations else "kosong", "mode": "content_based", "versi_aturan": VERSI_ATURAN,
         "sumber_dataset": metadata, "input": {"target_kalori": target, "prioritas": priority, "status_alergi": allergy, "alergen_ids": allergen_ids},
         "ringkasan": {"jumlah_makanan_sumber": len(rows), "jumlah_makanan_bergizi_valid": eligible_count,

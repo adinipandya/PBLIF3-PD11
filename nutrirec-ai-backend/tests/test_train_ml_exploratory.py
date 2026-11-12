@@ -12,6 +12,10 @@ ROOT = Path(__file__).resolve().parents[2]
 SPLIT = ROOT / "data/experiments/survey-v001/features-exploratory-split-002"
 
 
+@pytest.mark.skipif(
+    not all((SPLIT / name).is_file() for name in ("manifest.json", "train.csv", "test.csv", "split_report.json")),
+    reason="The fixed survey holdout is optional research data and is not distributed.",
+)
 def test_fixed_split_and_feature_target_contract():
     manifest, schema, train_rows, test_rows, report = train.validate_split(SPLIT)
     assert len(train_rows) == 828 and len(test_rows) == 222

@@ -22,6 +22,10 @@ from app.repositories import makanan_repo
 VERSI_ATURAN = "PD11-R2"
 logger = logging.getLogger(__name__)
 
+# ID stabil pada Dataset_makanan_fix.xlsx untuk Nasi Putih (Dijual Terpisah).
+# Pengecualian berbasis ID agar tidak ikut menyaring menu nasi lainnya.
+ID_MENU_TIDAK_DIREKOMENDASIKAN = 14
+
 KONDISI_TIDAK_KOSONG_MSG = (
     "Belum ada makanan yang lolos penyaringan. "
     "Periksa pilihan atau status verifikasi data makanan."
@@ -203,6 +207,8 @@ def urutkan_katalog_kandidat(db: Session, permintaan) -> list:
 
     menu_valid = []
     for makanan in get_semua_makanan(db):
+        if makanan.id_makanan == ID_MENU_TIDAK_DIREKOMENDASIKAN:
+            continue
         nutrisi = _baca_nutrisi(makanan)
         if nutrisi is not None:
             kalori, proporsi = nutrisi
@@ -245,7 +251,7 @@ def demo_terminal():
     from app.schemas.personalisasi import PermintaanPersonalisasi
     from scripts.import_dataset import baca_dataset, parse_alergen_tercatat
 
-    path = Path(__file__).resolve().parents[3] / "data" / "Dataset_makanan_revisi.xlsx"
+    path = Path(__file__).resolve().parents[3] / "data" / "Dataset_makanan_fix.xlsx"
     targets = ["Rendah", "Sedang", "Tinggi"]
     priorities = ["Protein", "Karbohidrat", "Lemak", "Seimbang"]
     allergens = ["Telur", "Kedelai", "Jagung", "Kelapa", "Ayam", "Daging sapi", "Gandum", "Kacang-kacangan", "Udang/seafood", "Ikan", "Beras"]

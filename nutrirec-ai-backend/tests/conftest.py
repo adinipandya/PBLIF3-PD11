@@ -112,7 +112,7 @@ def seed_makanan(seed_referensi: Session):
         berat_porsi_gram=None,
         sumber_data="https://nutrinusa.id/kalori/sup-tahu-telur",
         kelompok_kalori="Rendah", label_prioritas="Protein; Lemak",
-        versi_dataset="revisi-PD11-R1",
+        versi_dataset="fix-PD11-R1",
     ))
     db.add(InformasiGizi(
         id_makanan=3, kalori=150, karbohidrat=8, lemak=8, protein=10
@@ -124,7 +124,7 @@ def seed_makanan(seed_referensi: Session):
         berat_porsi_gram=400,
         sumber_data="https://nutrinusa.id/kalori/soto-ayam-bening",
         kelompok_kalori="Rendah", label_prioritas="Protein",
-        versi_dataset="revisi-PD11-R1",
+        versi_dataset="fix-PD11-R1",
     ))
     db.add(InformasiGizi(
         id_makanan=5, kalori=250, karbohidrat=15, lemak=12, protein=18

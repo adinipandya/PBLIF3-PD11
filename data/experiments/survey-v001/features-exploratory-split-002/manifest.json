@@ -1,0 +1,32 @@
+{
+  "status": "exploratory_features_and_holdout_created",
+  "ready_for_training": false,
+  "ready_for_PD11_R2_evaluation": false,
+  "versi": "fitur-eksploratif-grouped-holdout-v1",
+  "source_dataset_version": "survey-v001",
+  "source_run_id": "pd11-r2-cleanup-003",
+  "source_run_training_flag": false,
+  "seed": 42,
+  "jumlah_baris": 1050,
+  "jumlah_train": 828,
+  "jumlah_test": 222,
+  "input_sha256": {
+    "processing_manifest": "4694e570bea21128fcaaaf9429a5b10a4f806a361104e9ec41aa4f08e33836b1",
+    "candidate_exploratory": "628a0d01ab203c077502752f005e96ecce02ada63b4d04af28859ff581a86c00",
+    "candidate_report": "d08baf85f93db5487ca28fa6579d30b9485ba01b083571381331cf74081d2da5",
+    "responses": "4316508efaa9d615493f01370d872a36d0471d780b9475df036d1a911426bd14",
+    "ratings": "370f873c3996b0f137306c1986b7832c3052f2f39f43404feb45178c0a8153ff",
+    "catalog": "983ac7798ef6d5e4f307191c1f881f2940a0f76c12c601b3909afd100fd1dd79"
+  },
+  "output_sha256": {
+    "split_groups.csv": "1d15557fe8c2fe92a59cfbf6865386c4f912c084db4e4dfd0d87be616e89c631",
+    "ml_feature_table_exploratory.csv": "30b3448c6ac09a299366d0aee09e62e8a5dd84f17082a01b82c6333e6fe3486f",
+    "exploratory_feasibility_report.json": "a522b1d3f52427a3250c5a462b2ccd1cc9d9d3dc8fba7139e316b24144f7f9bd",
+    "test.csv": "7ee995286274af511663efb70b8ccd7920d116d5d8303d5c7b23d6db164e23ef",
+    "split_report.json": "5dd2575c385cee5e38026c82d1c2e8a019f5b50f7ffdb433e634015be4a7452b",
+    "train.csv": "d6920895559ef503f8f53d5cb3671a29663d9268ec39cb49b70b573e68d5681c",
+    "split_config.json": "1d00117d07ca9bf9026b371f4cfc775c32d54a6847d84d37936902746c97c029",
+    "evaluation_groups.csv": "d7a1d641ec54ab454a6ff2390dec844179ab5f7d3081a6732696a68b8b7e6ee4",
+    "feature_schema.json": "bb6fd0a4214d5d4005aa06b3a048d25c41706b5904f62a2de3a548dac53dbdb6"
+  }
+}

@@ -3,7 +3,7 @@ scripts/import_dataset.py
 Skrip impor dataset makanan dari file Excel ke database MySQL.
 
 Cara pakai:
-  python scripts/import_dataset.py --file path/ke/Dataset_makanan_revisi.xlsx
+  python scripts/import_dataset.py --file ../data/Dataset_makanan_fix.xlsx
 
 Fitur:
   - Membaca sheet "Dataset" dari Excel
@@ -488,7 +488,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--file",
         required=True,
-        help="Path ke file Excel (Dataset_makanan_revisi.xlsx)",
+        help="Path ke file Excel katalog aktif (Dataset_makanan_fix.xlsx)",
     )
     parser.add_argument(
         "--dry-run",

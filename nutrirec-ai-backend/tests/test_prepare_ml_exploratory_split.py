@@ -9,9 +9,15 @@ from scripts import prepare_ml_exploratory_split as split
 
 ROOT = Path(__file__).resolve().parents[2]
 RUN = ROOT / "data/survey_versions/survey-v001/processing/pd11-r2-cleanup-003"
-FOODS = ROOT / "data/Dataset_makanan_revisi.xlsx"
+# This test verifies the immutable cleanup-003 manifest/hash from the historical
+# Revisi catalog. Runtime recommendation and current demo tests use Dataset_makanan_fix.xlsx.
+FOODS = ROOT / "nutrirec-ai-backend/data/Dataset_makanan_revisi.xlsx"
 
 
+@pytest.mark.skipif(
+    not (RUN / "processing_manifest.json").is_file(),
+    reason="The source survey processing run is private research data and is not distributed.",
+)
 def test_cleanup003_integrity_features_and_group_split(tmp_path):
     out = tmp_path / "features-exploratory-split"
     split_report, counts, result_dir = split.create_artifacts(RUN, FOODS, out)
@@ -72,6 +78,10 @@ def test_grouped_split_is_seeded_and_keeps_identical_groups_together():
     assert len(train1) == 8
 
 
+@pytest.mark.skipif(
+    not (RUN / "processing_manifest.json").is_file(),
+    reason="The source survey processing run is private research data and is not distributed.",
+)
 def test_source_run_not_ready_flag_is_preserved_and_bad_hash_rejected(tmp_path):
     source_manifest = json.loads((RUN / "processing_manifest.json").read_text())
     assert source_manifest["siap_training"] is False

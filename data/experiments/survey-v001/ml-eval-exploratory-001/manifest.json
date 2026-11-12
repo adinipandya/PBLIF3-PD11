@@ -1,0 +1,51 @@
+{
+  "status": "completed_exploratory_holdout_evaluation",
+  "production_model": false,
+  "source_ready_for_training": false,
+  "source_split_manifest_sha256": "f43dd8d5b8f6ae9feae84b0e225fef134529489ce4aba97771820eec6531c2e2",
+  "source_split": "/Users/user/PBLIF3-PD11-1/PBLIF3-PD11/data/experiments/survey-v001/features-exploratory-split-002",
+  "source_run_id": "pd11-r2-cleanup-003",
+  "input_sha256": {
+    "train": "d6920895559ef503f8f53d5cb3671a29663d9268ec39cb49b70b573e68d5681c",
+    "test": "7ee995286274af511663efb70b8ccd7920d116d5d8303d5c7b23d6db164e23ef",
+    "schema": "bb6fd0a4214d5d4005aa06b3a048d25c41706b5904f62a2de3a548dac53dbdb6"
+  },
+  "models": {
+    "Dummy": {
+      "file": "dummy-exploratory.joblib",
+      "sha256": "64c6fe6c3d09e36da8b6d8e8e0acde6cc5f9f4138958e302cb74ec0cedfd0421",
+      "roundtrip_temp_sha256": "64c6fe6c3d09e36da8b6d8e8e0acde6cc5f9f4138958e302cb74ec0cedfd0421",
+      "label": "exploratory candidate; not for runtime deployment"
+    },
+    "Decision Tree": {
+      "file": "decision-tree-exploratory.joblib",
+      "sha256": "c2f91f075a17e590980da25daadccf758f5c455299998f2af620c3809aa75d00",
+      "roundtrip_temp_sha256": "c2f91f075a17e590980da25daadccf758f5c455299998f2af620c3809aa75d00",
+      "label": "exploratory candidate; not for runtime deployment"
+    },
+    "Random Forest": {
+      "file": "random-forest-exploratory.joblib",
+      "sha256": "c86e66a4e1f67741324b924002ac3686fe80573dd75ccf5f701f6c9bb9f7521b",
+      "roundtrip_temp_sha256": "c86e66a4e1f67741324b924002ac3686fe80573dd75ccf5f701f6c9bb9f7521b",
+      "label": "exploratory candidate; not for runtime deployment"
+    },
+    "KNN": {
+      "file": "knn-exploratory.joblib",
+      "sha256": "ff783c40efda1a3e1516da90d06aca2f37005a4fecf17e120fce5cb2b19a9a42",
+      "roundtrip_temp_sha256": "ff783c40efda1a3e1516da90d06aca2f37005a4fecf17e120fce5cb2b19a9a42",
+      "label": "exploratory candidate; not for runtime deployment"
+    }
+  },
+  "output_sha256": {
+    "metrics.json": "37b88610a40b8428cf2286225f52ec4e268ec77cde594fdf886931b3d4dad092",
+    "experiment_config.json": "4d7dfa6addff147fec814d315608a8c75964b4615f04c74e7f4051f7c7289119",
+    "dummy-exploratory.joblib": "64c6fe6c3d09e36da8b6d8e8e0acde6cc5f9f4138958e302cb74ec0cedfd0421",
+    "knn-exploratory.joblib": "ff783c40efda1a3e1516da90d06aca2f37005a4fecf17e120fce5cb2b19a9a42",
+    "evaluation_report.json": "552662e2a34a431de75a7053197f01304e09339c52feaf16ffb92bb7d5d0175b",
+    "test_predictions.csv": "62f0e2eae3ff8cdc26ebbad882497bec5b0f8693f8e7740a5a59c991a1ff7347",
+    "decision-tree-exploratory.joblib": "c2f91f075a17e590980da25daadccf758f5c455299998f2af620c3809aa75d00",
+    "random-forest-exploratory.joblib": "c86e66a4e1f67741324b924002ac3686fe80573dd75ccf5f701f6c9bb9f7521b",
+    "comparison_vs_dummy.json": "cf9efdba3392f7ddf413900de159d5be7903254d21c1965fcdc0f218fd779e1e"
+  },
+  "timestamp_utc": "2026-11-08T03:36:24.561349+00:00"
+}

@@ -42,7 +42,7 @@ def _buat_menu(
             sumber_data="https://nutrinusa.id/kalori/test",
             kelompok_kalori=calorie_category(kalori),
             label_prioritas=None,
-            versi_dataset="revisi-PD11-R1",
+            versi_dataset="fix-PD11-R1",
         )
     )
     db.add(
@@ -378,3 +378,24 @@ def test_rekomendasi_satu_dua_dan_maksimal_tiga_kandidat(client: TestClient, db_
         response = _kirim_permintaan(client)
         assert response.status_code == 200
         assert response.json()["jumlah_kandidat"] == expected_counts[min(index, 2)]
+
+
+def test_rekomendasi_tidak_menampilkan_nasi_putih_dan_mengisi_top3_dari_kandidat_lain(
+    client: TestClient, db_session, seed_referensi
+):
+    # ID 14 adalah Nasi Putih (Dijual Terpisah) pada Dataset Fix dan sengaja
+    # diberi nilai protein tertinggi untuk memastikan pengecualian terjadi
+    # sebelum pemeringkatan/Top 3.
+    _buat_menu(db_session, 14, "Nasi Putih (Dijual Terpisah)", 400, 90, 10, 5, "Sedang")
+    _buat_menu(db_session, 106, "Nasi Goreng", 400, 80, 10, 5, "Sedang")
+    _buat_menu(db_session, 107, "Nasi Uduk", 400, 70, 10, 5, "Sedang")
+    _buat_menu(db_session, 108, "Ayam Panggang", 400, 60, 10, 5, "Sedang")
+
+    response = _kirim_permintaan(client)
+
+    assert response.status_code == 200
+    items = response.json()["kandidat"]
+    assert [item["id_makanan"] for item in items] == [106, 107, 108]
+    assert all(item["nama_makanan"] != "Nasi Putih (Dijual Terpisah)" for item in items)
+    assert any(item["nama_makanan"] == "Nasi Goreng" for item in items)
+    assert len(items) == 3
