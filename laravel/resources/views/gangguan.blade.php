@@ -25,7 +25,7 @@
 
             <nav class="actions screen-actions" aria-label="Aksi pemulihan">
                 <button type="button" class="primary" id="retry-recommendation">Coba Lagi</button>
-                <a href="{{ url('/') }}" class="secondary">Selesai</a>
+                <a href="{{ url('/') }}" class="secondary" data-clear-session>Selesai</a>
             </nav>
 
         </section>

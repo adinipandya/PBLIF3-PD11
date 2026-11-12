@@ -16,7 +16,7 @@
 
         <!-- HEADER -->
         <header class="navbar">
-            <a href="{{ url('/') }}" class="logo">
+            <a href="{{ url('/') }}" class="logo" data-clear-session>
                 NutriRec AI
             </a>
         </header>

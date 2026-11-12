@@ -1,6 +1,7 @@
 """Pengujian riwayat rekomendasi anonim berbasis sesi kiosk."""
 from fastapi.testclient import TestClient
 
+from app.models.alergen import KandunganAlergen
 from app.models.makanan import Makanan, InformasiGizi
 
 SESSION_A = "11111111-1111-4111-8111-111111111111"
@@ -25,6 +26,14 @@ def seed_food(db_session):
             protein=20,
             karbohidrat=40,
             lemak=10,
+        )
+    )
+    db_session.add(
+        KandunganAlergen(
+            id_makanan=901,
+            id_alergen=2,
+            status_verifikasi="Terverifikasi",
+            bahan_penyebab="bahan pengujian",
         )
     )
     db_session.flush()

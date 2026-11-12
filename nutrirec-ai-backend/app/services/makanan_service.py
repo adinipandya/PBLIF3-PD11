@@ -159,7 +159,7 @@ def hitung_skor_katalog(menu_valid, target_kalori: str, nama_prioritas: str):
     return details, low, high
 
 def urutkan_katalog_kandidat(db: Session, permintaan) -> list:
-    """Return all valid, allergy-eligible catalogue rows in canonical CB order."""
+    """Return valid catalogue rows with verified allergen data in canonical CB order."""
     target = db.get(TargetKalori, permintaan.target_kalori_id)
     prioritas = db.get(PrioritasNutrisi, permintaan.prioritas_id)
 
@@ -215,7 +215,7 @@ def urutkan_katalog_kandidat(db: Session, permintaan) -> list:
 
     hasil = []
     for makanan, _, _ in menu_valid:
-        if permintaan.status_alergi and not _lolos_alergi(makanan, pilihan):
+        if not _lolos_alergi(makanan, pilihan):
             continue
         hasil.append({"makanan": makanan, **skor_by_id[makanan.id_makanan]})
 

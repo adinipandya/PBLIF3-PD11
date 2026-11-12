@@ -279,6 +279,15 @@ function showResult() {
 
 if (typeof document !== 'undefined') {
     const path = location.pathname.replace(/\/$/, '') || '/';
+    if (path === '/') sessionStorage.removeItem(KEY);
+    document.querySelectorAll('[data-clear-session]').forEach(link => {
+        link.addEventListener('click', () => {
+            sessionStorage.removeItem(KEY);
+            document.getElementById('result-summary')?.replaceChildren();
+            document.getElementById('result-grid')?.replaceChildren();
+            document.getElementById('empty-summary')?.replaceChildren();
+        });
+    });
     if (path === '/kalori') setupChoices('calorieForm', 'calorieOptions', 'target', 'target_kalori', 'id_target', 'nama_kategori', 'radio');
     if (path === '/prioritas') setupChoices('priorityForm', 'priorityOptions', 'prioritas', 'prioritas_nutrisi', 'id_prioritas', 'nama_prioritas', 'radio');
     if (path === '/alergi') setupAllergy();

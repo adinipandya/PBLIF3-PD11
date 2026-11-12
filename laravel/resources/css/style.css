@@ -584,12 +584,6 @@ a {
     flex-wrap: wrap;
 }
 
-.allergy-question-buttons .btn-next {
-    min-width: 180px;
-    text-align: center;
-    text-decoration: none;
-}
-
 @media (max-width: 600px) {
     .allergy-question-buttons {
         flex-direction: column;
@@ -2567,4 +2561,674 @@ input:focus-visible {
     background: #fbf3e2;
     color: #15172b;
     font-size: 13px;
+}
+
+/* =====================================
+   MICRO INTERACTIONS - HOME PAGE
+===================================== */
+
+/* Animasi card cara kerja */
+.steps-panel .step {
+    transition:
+        transform 250ms ease,
+        box-shadow 250ms ease,
+        background-color 250ms ease;
+}
+
+@media (hover: hover) {
+    .steps-panel .step:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 18px rgba(21, 23, 43, 0.09);
+    }
+}
+
+/* Animasi nomor tahapan */
+.steps-panel .step-number {
+    transition: transform 250ms ease;
+}
+
+@media (hover: hover) {
+    .steps-panel .step:hover .step-number {
+        transform: scale(1.08);
+    }
+}
+
+/* Animasi tombol utama */
+.screen-welcome .primary {
+    transition:
+        background-color 250ms ease,
+        box-shadow 250ms ease,
+        transform 250ms ease;
+}
+
+@media (hover: hover) {
+    .screen-welcome .primary:hover {
+        background-color: #f6c04f;
+        box-shadow: 0 8px 18px rgba(21, 23, 43, 0.13);
+        transform: translateY(-3px);
+    }
+}
+
+.screen-welcome .primary:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Animasi kemunculan halaman home */
+.screen-welcome .question-header {
+    animation: homeFadeUp 600ms ease both;
+}
+
+.screen-welcome .primary {
+    animation: homeFadeUp 700ms ease both;
+}
+
+.screen-welcome .steps-panel {
+    animation: homeFadeUp 850ms ease both;
+}
+
+
+/* =====================================
+   HOME PAGE - STAGGER REVEAL ANIMATION
+===================================== */
+
+@keyframes revealUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+        filter: blur(3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+.screen-welcome .question-header > * {
+    opacity: 0;
+    animation: revealUp 700ms cubic-bezier(.2, .7, .3, 1) forwards;
+}
+
+.screen-welcome .question-header > *:nth-child(1) {
+    animation-delay: 100ms;
+}
+
+.screen-welcome .question-header > *:nth-child(2) {
+    animation-delay: 250ms;
+}
+
+.screen-welcome .question-header > *:nth-child(3) {
+    animation-delay: 400ms;
+}
+
+.screen-welcome .primary {
+    opacity: 0;
+    animation: revealUp 700ms ease 550ms forwards;
+}
+
+.screen-welcome .steps-panel {
+    opacity: 0;
+    animation: revealUp 750ms ease 700ms forwards;
+}
+
+.screen-welcome .steps-panel .step {
+    opacity: 0;
+    animation: revealUp 600ms ease forwards;
+}
+
+.screen-welcome .steps-panel .step:nth-child(1) {
+    animation-delay: 850ms;
+}
+
+.screen-welcome .steps-panel .step:nth-child(2) {
+    animation-delay: 1000ms;
+}
+
+.screen-welcome .steps-panel .step:nth-child(3) {
+    animation-delay: 1150ms;
+}
+
+.screen-welcome .steps-panel .step:nth-child(4) {
+    animation-delay: 1300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .screen-welcome *,
+    .screen-welcome *::before,
+    .screen-welcome *::after {
+        animation: none !important;
+        opacity: 1 !important;
+        filter: none !important;
+    }
+}
+
+/* Aksesibilitas */
+@media (prefers-reduced-motion: reduce) {
+    .screen-welcome *,
+    .screen-welcome *::before,
+    .screen-welcome *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* KARTU PILIHAN KALORI */
+.screen-calorie .calorie-options .choice,
+.screen-calorie .calorie-options .calorie-card {
+    border: 1.5px solid #B8AD99 !important;
+    background: #FBF3E2;
+    box-shadow: 0 3px 10px rgba(21, 23, 43, 0.06);
+    transition:
+        transform 300ms ease,
+        box-shadow 300ms ease,
+        border-color 300ms ease,
+        background-color 300ms ease;
+}
+
+/* Kartu saat diarahkan cursor */
+@media (hover: hover) {
+    .screen-calorie .calorie-options .choice:not(:has(input:checked)):hover,
+    .screen-calorie .calorie-options .calorie-card:not(:has(input:checked)):hover {
+        border-color: #FDAF00 !important;
+        box-shadow: 0 8px 20px rgba(21, 23, 43, 0.10);
+        transform: translateY(-5px);
+    }
+}
+
+/* Kartu yang dipilih */
+.screen-calorie .calorie-options .choice:has(input:checked),
+.screen-calorie .calorie-options .calorie-card:has(input:checked) {
+    border: 1.5px solid #15172B !important;
+    background: #FDAF00;
+}
+
+/* ANIMASI HALAMAN TARGET KALORI */
+@keyframes calorieReveal {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.screen-calorie .question-header > * {
+    opacity: 0;
+    animation: calorieReveal 650ms ease forwards;
+}
+
+.screen-calorie .question-header > *:nth-child(1) {
+    animation-delay: 100ms;
+}
+
+.screen-calorie .question-header > *:nth-child(2) {
+    animation-delay: 250ms;
+}
+
+.screen-calorie .calorie-options > * {
+    opacity: 0;
+    animation: calorieReveal 700ms ease forwards;
+}
+
+.screen-calorie .calorie-options > *:nth-child(1) {
+    animation-delay: 350ms;
+}
+
+.screen-calorie .calorie-options > *:nth-child(2) {
+    animation-delay: 500ms;
+}
+
+.screen-calorie .calorie-options > *:nth-child(3) {
+    animation-delay: 650ms;
+}
+
+.screen-calorie .screen-action {
+    opacity: 0;
+    animation: calorieReveal 700ms ease 850ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .screen-calorie *,
+    .screen-calorie *::before,
+    .screen-calorie *::after {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+}
+
+/* =====================================
+   PRIORITAS NUTRISI - REVEAL ANIMATION
+===================================== */
+
+@keyframes priorityReveal {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header muncul bertahap */
+.screen-priority .question-header > * {
+    opacity: 0;
+    animation: priorityReveal 650ms ease forwards;
+}
+
+.screen-priority .question-header > *:nth-child(1) {
+    animation-delay: 100ms;
+}
+
+.screen-priority .question-header > *:nth-child(2) {
+    animation-delay: 250ms;
+}
+
+/* Empat pilihan muncul bergantian */
+.screen-priority .priority-options > * {
+    opacity: 0;
+    animation: priorityReveal 700ms ease forwards;
+}
+
+.screen-priority .priority-options > *:nth-child(1) {
+    animation-delay: 350ms;
+}
+
+.screen-priority .priority-options > *:nth-child(2) {
+    animation-delay: 500ms;
+}
+
+.screen-priority .priority-options > *:nth-child(3) {
+    animation-delay: 650ms;
+}
+
+.screen-priority .priority-options > *:nth-child(4) {
+    animation-delay: 800ms;
+}
+
+/* Hover pilihan */
+.screen-priority .priority-options .choice {
+    transition: transform 250ms ease, box-shadow 250ms ease,
+                border-color 250ms ease;
+}
+
+@media (hover: hover) {
+    .screen-priority .priority-options .choice:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(21, 23, 43, 0.10);
+        border-color: #FDAF00 !important;
+    }
+}
+
+/* Tombol lanjut muncul terakhir */
+.screen-priority .screen-action {
+    opacity: 0;
+    animation: priorityReveal 700ms ease 1000ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .screen-priority *,
+    .screen-priority *::before,
+    .screen-priority *::after {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+}
+
+/* =====================================
+   HALAMAN ALERGI - STAGGER ANIMATION
+===================================== */
+
+@keyframes allergyReveal {
+    from {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header muncul bertahap */
+.screen-allergy .question-header > * {
+    opacity: 0;
+    animation: allergyReveal 650ms ease forwards;
+}
+
+.screen-allergy .question-header > *:nth-child(1) {
+    animation-delay: 100ms;
+}
+
+.screen-allergy .question-header > *:nth-child(2) {
+    animation-delay: 250ms;
+}
+
+.screen-allergy .question-header > *:nth-child(3) {
+    animation-delay: 350ms;
+}
+
+/* Card alergi muncul satu per satu */
+.screen-allergy .allergy-choice {
+    opacity: 0;
+    animation: allergyReveal 600ms ease forwards;
+    transition:
+        transform 250ms ease,
+        box-shadow 250ms ease,
+        border-color 250ms ease;
+}
+
+.screen-allergy .allergy-choice:nth-child(1) {
+    animation-delay: 450ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(2) {
+    animation-delay: 520ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(3) {
+    animation-delay: 590ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(4) {
+    animation-delay: 660ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(5) {
+    animation-delay: 730ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(6) {
+    animation-delay: 800ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(7) {
+    animation-delay: 870ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(8) {
+    animation-delay: 940ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(9) {
+    animation-delay: 1010ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(10) {
+    animation-delay: 1080ms;
+}
+
+.screen-allergy .allergy-choice:nth-child(11) {
+    animation-delay: 1150ms;
+}
+
+/* Hover card */
+@media (hover: hover) {
+    .screen-allergy .allergy-choice:hover {
+        transform: translateY(-4px);
+        border-color: #FDAF00 !important;
+        box-shadow: 0 8px 18px rgba(21, 23, 43, 0.09);
+    }
+}
+
+/* Icon sedikit membesar saat hover */
+.screen-allergy .allergy-choice .icon-disc {
+    transition: transform 250ms ease;
+}
+
+@media (hover: hover) {
+    .screen-allergy .allergy-choice:hover .icon-disc {
+        transform: scale(1.1);
+    }
+}
+
+/* Tombol lanjut muncul terakhir */
+.screen-allergy .screen-action {
+    opacity: 0;
+    animation: allergyReveal 700ms ease 1300ms forwards;
+}
+
+/* Aksesibilitas */
+@media (prefers-reduced-motion: reduce) {
+    .screen-allergy *,
+    .screen-allergy *::before,
+    .screen-allergy *::after {
+        animation: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+    }
+}
+
+/* =====================================
+   GLOBAL BUTTON INTERACTION
+===================================== */
+
+/* Transisi semua tombol */
+button,
+a.primary,
+a.secondary,
+a.btn,
+.btn-primary,
+.btn-next,
+.btn-back,
+.result-finish,
+.error-retry,
+.error-finish,
+.notfound-reset,
+.notfound-finish,
+.screen-action {
+    transition:
+        transform 180ms ease,
+        background-color 180ms ease,
+        box-shadow 180ms ease,
+        filter 180ms ease;
+}
+
+/* Hover */
+@media (hover: hover) {
+    button:not(:disabled):hover,
+    a.primary:hover,
+    a.secondary:hover,
+    a.btn:hover,
+    .btn-primary:hover,
+    .btn-next:hover,
+    .btn-back:hover,
+    .result-finish:hover,
+    .error-retry:hover,
+    .error-finish:hover,
+    .notfound-reset:hover,
+    .notfound-finish:hover,
+    .screen-action:hover {
+        filter: brightness(0.96);
+    }
+}
+
+/* Saat tombol ditekan */
+button:not(:disabled):active,
+a.primary:active,
+a.secondary:active,
+a.btn:active,
+.btn-primary:active,
+.btn-next:active,
+.btn-back:active,
+.result-finish:active,
+.error-retry:active,
+.error-finish:active,
+.notfound-reset:active,
+.notfound-finish:active,
+.screen-action:active {
+    transform: scale(0.97);
+    filter: brightness(0.90);
+    box-shadow: none;
+}
+
+/* Tombol disabled tidak ikut bereaksi */
+button:disabled,
+.btn-next:disabled {
+    transform: none;
+    filter: none;
+    cursor: not-allowed;
+}
+
+/* Aksesibilitas */
+@media (prefers-reduced-motion: reduce) {
+    button,
+    a,
+    .screen-action {
+        transition: none !important;
+    }
+}
+
+/* KONFIRMASI ALERGI - ANIMASI */
+
+@keyframes confirmAllergyShow {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Judul dan label */
+.question-header {
+    animation: confirmAllergyShow 700ms ease both;
+}
+
+/* Tombol muncul bergantian */
+.allergy-question-buttons .btn-next {
+    opacity: 0;
+    animation: confirmAllergyShow 700ms ease forwards;
+}
+
+.allergy-question-buttons .btn-next:first-child {
+    animation-delay: 350ms;
+}
+
+.allergy-question-buttons .btn-next:last-child {
+    animation-delay: 550ms;
+}
+
+/* Hover tombol */
+.allergy-question-buttons .btn-next {
+    transition:
+        transform 250ms ease,
+        box-shadow 250ms ease,
+        filter 250ms ease !important;
+}
+
+@media (hover: hover) {
+    .allergy-question-buttons .btn-next:hover {
+        transform: translateY(-5px) !important;
+        box-shadow: 0 9px 20px rgba(21, 23, 43, 0.13);
+        filter: brightness(0.96);
+    }
+}
+
+/* Efek klik */
+.allergy-question-buttons .btn-next:active {
+    transform: scale(0.96) !important;
+    filter: brightness(0.88);
+    box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .question-header,
+    .allergy-question-buttons .btn-next {
+        animation: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+    }
+}
+
+/* =====================================
+   ALERGI QUESTION - BUTTON ANIMATION
+===================================== */
+
+@keyframes allergyButtonReveal {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animasi judul */
+.screen-allergy-question .question-header {
+    animation: allergyButtonReveal 700ms ease both;
+}
+
+/* Animasi tombol */
+.screen-allergy-question .allergy-question-buttons .primary,
+.screen-allergy-question .allergy-question-buttons .secondary {
+    opacity: 0;
+    animation: allergyButtonReveal 700ms ease forwards;
+}
+
+.screen-allergy-question .allergy-question-buttons .primary {
+    animation-delay: 350ms;
+}
+
+.screen-allergy-question .allergy-question-buttons .secondary {
+    animation-delay: 550ms;
+}
+
+/* Transisi tombol */
+.screen-allergy-question .allergy-question-buttons a {
+    transition:
+        transform 250ms ease,
+        box-shadow 250ms ease,
+        filter 250ms ease,
+        background-color 250ms ease !important;
+}
+
+/* Hover: tombol naik */
+@media (hover: hover) {
+    .screen-allergy-question .allergy-question-buttons a:hover {
+        transform: translateY(-5px) !important;
+        box-shadow: 0 9px 20px rgba(21, 23, 43, 0.13);
+        filter: brightness(0.96);
+    }
+}
+
+/* Saat diklik */
+.screen-allergy-question .allergy-question-buttons a:active {
+    transform: scale(0.96) !important;
+    filter: brightness(0.88);
+    box-shadow: none;
+}
+
+/* Aksesibilitas */
+@media (prefers-reduced-motion: reduce) {
+    .screen-allergy-question *,
+    .screen-allergy-question *::before,
+    .screen-allergy-question *::after {
+        animation: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+    }
+}
+input,
+textarea,
+[contenteditable="true"] {
+    caret-color: transparent !important;
+}
+::selection {
+    background: transparent;
+    color: inherit;
+}
+
+::-moz-selection {
+    background: transparent;
+    color: inherit;
 }

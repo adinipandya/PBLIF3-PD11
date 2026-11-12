@@ -54,7 +54,8 @@ def _buat_menu(
             protein=Decimal(str(protein)),
         )
     )
-    for id_alergen in allergen_ids or []:
+    # Default fixtures have known allergen data; pass [] to model missing relations.
+    for id_alergen in [3] if allergen_ids is None else allergen_ids:
         db.add(
             KandunganAlergen(
                 id_makanan=id_makanan,
@@ -190,6 +191,7 @@ def test_rekomendasi_alergi_tunggal_menolak_data_tidak_aman(
     _buat_menu(
         db_session, 202, "Menu Tanpa Relasi",
         150, 10, 8, 8, "Rendah",
+        [],
     )
 
     # 203: mengandung Kedelai terverifikasi, bukan Telur → lolos.
@@ -229,6 +231,31 @@ def test_rekomendasi_alergi_tunggal_menolak_data_tidak_aman(
     assert 202 not in ids
     assert 204 not in ids
     assert 205 not in ids
+
+
+def test_rekomendasi_tanpa_alergi_menolak_data_alergen_tidak_diketahui(
+    client: TestClient, db_session, seed_referensi
+):
+    _buat_menu(
+        db_session, 401, "Menu Terverifikasi",
+        150, 10, 8, 8, "Rendah",
+        [2], status="Terverifikasi",
+    )
+    _buat_menu(
+        db_session, 402, "Menu Pending",
+        150, 10, 8, 8, "Rendah",
+        [2], status="Belum diverifikasi",
+    )
+    _buat_menu(
+        db_session, 403, "Menu Tanpa Relasi",
+        150, 10, 8, 8, "Rendah",
+        [],
+    )
+
+    resp = _kirim_permintaan(client, status_alergi=False)
+
+    assert resp.status_code == 200
+    assert [item["id_makanan"] for item in resp.json()["kandidat"]] == [401]
 
 
 def test_rekomendasi_alergi_multi_mengeluarkan_semua_id_pilihan(client: TestClient, db_session, seed_referensi):

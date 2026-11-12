@@ -38,7 +38,7 @@
 
             <nav class="actions screen-actions" aria-label="Navigasi hasil kosong">
                 <a href="{{ url('/kalori') }}" class="secondary">Personalisasi Ulang</a>
-                <a href="{{ url('/') }}" class="primary">Selesai <span aria-hidden="true">→</span></a>
+                <a href="{{ url('/') }}" class="primary" data-clear-session>Selesai <span aria-hidden="true">→</span></a>
             </nav>
 
         </section>
